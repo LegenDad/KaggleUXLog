@@ -1,15 +1,9 @@
 rm(list=ls()); gc()
-adt <- read.csv("Data/AD_Tracking/train_sample.csv", stringsAsFactors = F)
+library(data.table)
+adt <- fread("../input/train_sample.csv")
 library(lubridate)
-#adt$click_time <- as.POSIXct(adt$click_time)
-#range(adt$click_time)
-#adt$click_hour <- format(adt$click_time, "%H")
-#adt$click_weekd <- format(adt$click_time, "%a")
-#adt$click_hour <- as.factor(format(adt$click_time, "%H"))
-#adt$click_weekd <- as.factor(format(adt$click_time, "%a"))
 adt$click_hour <- hour(adt$click_time)
 adt$click_weekd <- wday(adt$click_time)
-
 library(dplyr)
 colnames(adt)
 str(adt)
@@ -18,10 +12,11 @@ adt <- adt %>% add_count(ip, click_hour, app)
 adt <- adt %>% add_count(ip, click_hour, device)
 adt <- adt %>% add_count(ip, click_hour, os)
 adt <- adt %>% add_count(ip, click_hour, channel)
+adt <- adt %>% add_count(ip)
 head(adt)
-colnames(adt)[11:15] <- c("ip_hw", "ip_app", "ip_dev", "ip_os", "ip_ch")
+colnames(adt)[11:16] <- c("ip_hw", "ip_app", "ip_dev", "ip_os", "ip_ch", 
+                          "ip_cnt")
 colnames(adt)
-head(adt)
 #install.packages("xgboost")
 library(xgboost)
 library(caret)
@@ -31,7 +26,8 @@ set.seed(777)
 adt_index <- createDataPartition(adt$is_attributed, p=0.7, list = F)
 y <- adt[adt_index,]$is_attributed
 
-adtr <- adt[,-c(1,6:8)]
+adtr <- adt %>% select(-ip, -click_time, -attributed_time, -is_attributed)
+#adtr <- adt[,-c(1,6:8)]
 colnames(adtr)
 str(adtr)
 dtest <- xgb.DMatrix(data = data.matrix(adtr[-adt_index,]))
@@ -39,14 +35,6 @@ tri <- createDataPartition(y, p = 0.9, list = F)
 dtrain <- xgb.DMatrix(data = data.matrix(adtr[adt_index,][tri,]), label = y[tri])
 dval <- xgb.DMatrix(data = data.matrix(adtr[adt_index,][-tri,]), label = y[-tri])
 cols <- colnames(adtr)
-#dtest <- xgb.DMatrix(data = data.matrix(tr_te[-tri]))
-#tr_te <- tr_te[tri]
-#tri <- caret::createDataPartition(y, p = 0.9, list = F)
-#dtrain <- xgb.DMatrix(data = data.matrix(tr_te[tri]), label = y[tri])
-#dval <- xgb.DMatrix(data = data.matrix(tr_te[-tri]), label = y[-tri])
-#cols <- colnames(tr_te)
-#
-#rm(tr_te, y, tri); gc()
 
 p <- list(objective = "binary:logistic",
           booster = "gbtree",
