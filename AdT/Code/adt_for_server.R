@@ -77,6 +77,7 @@ plot(prf)
 auc <- performance(pr, measure = "auc")
 auc <- auc@y.values[[1]]
 auc
+rm(auc, pr, prf, predXG2, dtest, dval, dtrain, adtr, adt); gc()
 ##### test data _ NOT RUN in Local #####
 adte <- fread("../input/test.csv")
 adte <- adte %>% select(-click_id)
