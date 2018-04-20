@@ -2,6 +2,7 @@ rm(list=ls()); gc()
 #adt <- adt[sample(.N, 30e6), ]
 library(data.table)
 adt <- fread("../input/train.csv")
+adt <- adt[sample(.N, 10e6), ]
 library(lubridate)
 adt$click_hour <- hour(adt$click_time)
 adt$click_weekd <- wday(adt$click_time)
