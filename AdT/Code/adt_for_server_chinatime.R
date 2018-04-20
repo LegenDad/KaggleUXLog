@@ -2,7 +2,7 @@ rm(list=ls()); gc()
 #adt <- adt[sample(.N, 30e6), ]
 library(data.table)
 adt <- fread("../input/train.csv")
-adt <- adt[sample(.N, 15e6), ]
+adt <- adt[sample(.N, 25e6), ]
 library(lubridate)
 adt$click_time <- as.POSIXct(adt$click_time) + 60*60*8
 adt$click_hour <- hour(adt$click_time)
