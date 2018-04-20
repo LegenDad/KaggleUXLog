@@ -2,7 +2,7 @@ rm(list=ls()); gc()
 #adt <- adt[sample(.N, 30e6), ]
 library(data.table)
 adt <- fread("../input/train.csv")
-adt <- adt[sample(.N, 10e6), ]
+adt <- adt[sample(.N, 10e5), ]
 library(lubridate)
 adt$click_hour <- hour(adt$click_time)
 adt$click_weekd <- wday(adt$click_time)
@@ -40,8 +40,7 @@ colnames(adtr)
 table(adtr$is_attributed); table(adte$is_attributed)
 
 ###### glm #####
-glm <- glm(is_attributed~., 
-           family = binomial, adtr)
+glm <- glm(is_attributed~., family = binomial, adtr)
 summary(glm)
 anova(glm, test = "Chisq")
 library(pscl)
