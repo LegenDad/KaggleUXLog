@@ -1,4 +1,5 @@
 rm(list=ls()); gc()
+#adt <- adt[sample(.N, 30e6), ]
 library(data.table)
 adt <- fread("../input/train_sample.csv")
 library(lubridate)
@@ -8,14 +9,18 @@ library(dplyr)
 colnames(adt)
 str(adt)
 adt <- adt %>% add_count(ip, click_hour, click_weekd) 
-adt <- adt %>% add_count(ip, click_hour, app)
-adt <- adt %>% add_count(ip, click_hour, device)
-adt <- adt %>% add_count(ip, click_hour, os)
-adt <- adt %>% add_count(ip, click_hour, channel)
+adt <- adt %>% add_count(ip, app)
+adt <- adt %>% add_count(ip, device)
+adt <- adt %>% add_count(ip, os)
+adt <- adt %>% add_count(ip, channel)
 adt <- adt %>% add_count(ip)
+adt <- adt %>% add_count(app)
+adt <- adt %>% add_count(device)
+adt <- adt %>% add_count(os)
+adt <- adt %>% add_count(channel)
 head(adt)
-colnames(adt)[11:16] <- c("ip_hw", "ip_app", "ip_dev", "ip_os", "ip_ch", 
-                          "ip_cnt")
+colnames(adt)[11:20] <- c("ip_hw", "ip_app", "ip_dev", "ip_os", "ip_ch", 
+                          "ip_cnt", "app_cnt", "dev_cnt", "os_cnt", "ch_cnt")
 colnames(adt)
 #install.packages("xgboost")
 library(xgboost)
@@ -24,16 +29,16 @@ colnames(adt)
 colnames(adt[,-c(1,6:8)])
 set.seed(777)
 adt_index <- createDataPartition(adt$is_attributed, p=0.7, list = F)
-y <- adt[adt_index,]$is_attributed
-
+#y <- adt[adt_index,]$is_attributed
+y <- adt$is_attributed
 adtr <- adt %>% select(-ip, -click_time, -attributed_time, -is_attributed)
-#adtr <- adt[,-c(1,6:8)]
 colnames(adtr)
-str(adtr)
 dtest <- xgb.DMatrix(data = data.matrix(adtr[-adt_index,]))
-tri <- createDataPartition(y, p = 0.9, list = F)
-dtrain <- xgb.DMatrix(data = data.matrix(adtr[adt_index,][tri,]), label = y[tri])
-dval <- xgb.DMatrix(data = data.matrix(adtr[adt_index,][-tri,]), label = y[-tri])
+tri <- createDataPartition(y[adt_index], p = 0.9, list = F)
+dtrain <- xgb.DMatrix(data = data.matrix(adtr[adt_index,][tri,]), 
+                      label = y[adt_index][tri])
+dval <- xgb.DMatrix(data = data.matrix(adtr[adt_index,][-tri,]), 
+                    label = y[adt_index][-tri])
 cols <- colnames(adtr)
 
 p <- list(objective = "binary:logistic",
@@ -57,13 +62,14 @@ m_xgb <- xgb.train(p, dtrain, p$nrounds, list(val = dval), print_every_n = 50,
 (imp <- xgb.importance(cols, model=m_xgb))
 xgb.plot.importance(imp, top_n = 10)
 predXG <- predict(m_xgb,dtest)
-predXG <- ifelse(predXG > 0.5,1,0)
-sum(predXG)
+predXG2 <- ifelse(predXG > 0.85,1,0)
+sum(predXG2)
 library(e1071)
-confusionMatrix(as.factor(predXG), as.factor(adt[-adt_index,]$is_attributed))
+confusionMatrix(as.factor(predXG2), as.factor(adt[-adt_index,]$is_attributed))
 #install.packages("ROCR")
 library(ROCR)
-pr <- prediction(predXG, adt[-adt_index,]$is_attributed)
+#pr <- prediction(predXG, adt[-adt_index,]$is_attributed)
+pr <- prediction(predXG, y[-adt_index])
 prf <- performance(pr, measure = "tpr", x.measure = "fpr")
 plot(prf)
 
