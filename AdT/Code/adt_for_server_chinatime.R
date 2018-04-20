@@ -1,6 +1,4 @@
 rm(list=ls()); gc()
-library(randomForest)
-?randomForest
 #adt <- adt[sample(.N, 30e6), ]
 library(data.table)
 adt <- fread("../input/train.csv")
