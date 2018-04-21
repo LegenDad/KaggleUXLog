@@ -40,7 +40,7 @@ dtrain <- xgb.DMatrix(data = data.matrix(adtr[adt_index,][tri,]),
 dval <- xgb.DMatrix(data = data.matrix(adtr[adt_index,][-tri,]), 
                     label = y[adt_index][-tri])
 cols <- colnames(adtr)
-
+rm(adt); gc()
 p <- list(objective = "binary:logistic",
           booster = "gbtree",
           eval_metric = "auc",
@@ -65,7 +65,7 @@ predXG <- predict(m_xgb,dtest)
 predXG2 <- ifelse(predXG > 0.85,1,0)
 sum(predXG2)
 library(e1071)
-confusionMatrix(as.factor(predXG2), as.factor(adt[-adt_index,]$is_attributed))
+confusionMatrix(as.factor(predXG2), as.factor(y[-adt_index]))
 #install.packages("ROCR")
 library(ROCR)
 #pr <- prediction(predXG, adt[-adt_index,]$is_attributed)
