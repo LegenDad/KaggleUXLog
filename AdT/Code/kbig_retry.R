@@ -2,7 +2,7 @@ rm(list=ls()); gc()
 #adt <- adt[sample(.N, 30e6), ]
 library(data.table)
 adt <- fread("../input/train.csv")
-adt <- adt[sample(.N, 35e6), ]
+adt <- adt[sample(.N, 50e6), ]
 library(lubridate)
 adt$click_hour <- hour(adt$click_time)
 adt$click_weekd <- wday(adt$click_time)
@@ -23,6 +23,13 @@ head(adt)
 colnames(adt)[11:20] <- c("ip_hw", "ip_app", "ip_dev", "ip_os", "ip_ch", 
                           "ip_cnt", "app_cnt", "dev_cnt", "os_cnt", "ch_cnt")
 colnames(adt)
+dim(adt)
+saveRDS(adt, "adt_50e6")
+list.files()
+rm(list=ls()); gc()
+###########
+adt <- readRDS("adt_50e6")
+dim(adt)
 #install.packages("xgboost")
 library(xgboost)
 library(caret)
@@ -57,7 +64,7 @@ p <- list(objective = "binary:logistic",
           lambda = 74.6334,
           scale_pos_weight = 103,
           nrounds = 3000)
-m_xgb <- xgb.train(p, dtrain, p$nrounds, list(val = dval), print_every_n = 50, 
+m_xgb <- xgb.train(p, dtrain, p$nrounds, list(val = dval), print_every_n = 10, 
                    early_stopping_rounds = 200)
 
 (imp <- xgb.importance(cols, model=m_xgb))
