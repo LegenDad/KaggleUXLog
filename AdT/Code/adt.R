@@ -55,9 +55,9 @@ p <- list(objective = "binary:logistic",
           alpha = 43.2165,
           lambda = 74.6334,
           scale_pos_weight = 103,
-          nrounds = 3000)
-m_xgb <- xgb.train(p, dtrain, p$nrounds, list(val = dval), print_every_n = 50, 
-                   early_stopping_rounds = 200)
+          nrounds = 5000)
+m_xgb <- xgb.train(p, dtrain, p$nrounds, list(val = dval), print_every_n = 10, 
+                   early_stopping_rounds = 500)
 
 (imp <- xgb.importance(cols, model=m_xgb))
 xgb.plot.importance(imp, top_n = 10)
