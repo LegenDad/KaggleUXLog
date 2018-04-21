@@ -2,7 +2,7 @@ rm(list=ls()); gc()
 #adt <- adt[sample(.N, 30e6), ]
 library(data.table)
 adt <- fread("../input/train.csv")
-#adt <- adt[sample(.N, 35e6), ]
+adt <- adt[sample(.N, 50e6), ]
 library(lubridate)
 adt$click_hour <- hour(adt$click_time)
 adt$click_weekd <- wday(adt$click_time)
@@ -78,6 +78,7 @@ auc <- performance(pr, measure = "auc")
 auc <- auc@y.values[[1]]
 auc
 rm(auc, pr, prf, predXG2, dtest, dval, dtrain, adtr, adt); gc()
+rm(adt_index, cols, predXG, tri, y); gc()
 ##### test data _ NOT RUN in Local #####
 adte <- fread("../input/test.csv")
 adte <- adte %>% select(-click_id)
@@ -98,6 +99,7 @@ colnames(adte)[9:18] <- c("ip_hw", "ip_app", "ip_dev", "ip_os", "ip_ch",
                           "ip_cnt", "app_cnt", "dev_cnt", "os_cnt", "ch_cnt")
 adte <- adte %>% select(-ip, -click_time)
 adtest <- xgb.DMatrix(data = data.matrix(adte))
+rm(adte); gc()
 realpred <- predict(m_xgb, adtest)
 sub <- fread("../input/sample_submission.csv")
 sub$is_attributed <- realpred
