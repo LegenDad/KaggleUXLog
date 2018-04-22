@@ -3,7 +3,7 @@ rm(list=ls()); gc()
 library(data.table)
 adt <- fread("../input/train.csv")
 set.seed(777)
-adt <- adt[sample(.N, 10e6), ]
+adt <- adt[sample(.N, 20e6), ]
 library(lubridate)
 adt$click_hour <- hour(adt$click_time)
 adt$click_weekd <- wday(adt$click_time)
@@ -68,6 +68,6 @@ adte <- adte %>% select(-ip, -click_time)
 realglm <- predict(glm, adte, type = "response")
 sub <- fread("../input/sample_submission.csv")
 sub$is_attributed <- round(realglm, 6)
-fwrite(sub, paste0("adt_glm_", auc, ".csv"))
+fwrite(sub, paste0("adt_glm_", round(auc,6), ".csv"))
 
 #####
