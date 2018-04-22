@@ -57,7 +57,7 @@ p <- list(objective = "binary:logistic",
           lambda = 74.6334,
           scale_pos_weight = 103,
           nrounds = 3000)
-m_xgb <- xgb.train(p, dtrain, p$nrounds, list(val = dval), print_every_n = 50, 
+m_xgb <- xgb.train(p, dtrain, p$nrounds, list(val = dval), print_every_n = 10, 
                    early_stopping_rounds = 200)
 
 (imp <- xgb.importance(cols, model=m_xgb))
