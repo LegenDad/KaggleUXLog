@@ -62,23 +62,22 @@ m_xgb <- xgb.train(p, dtrain, p$nrounds, list(val = dval), print_every_n = 10,
 
 (imp <- xgb.importance(cols, model=m_xgb))
 xgb.plot.importance(imp, top_n = 10)
-predXG <- predict(m_xgb,dtest)
-predXG2 <- ifelse(predXG > 0.85,1,0)
-sum(predXG2)
-library(e1071)
-confusionMatrix(as.factor(predXG2), as.factor(y[-adt_index]))
+#predXG <- predict(m_xgb,dtest)
+#predXG2 <- ifelse(predXG > 0.85,1,0)
+#sum(predXG2)
+#library(e1071)
+#confusionMatrix(as.factor(predXG2), as.factor(y[-adt_index]))
 #install.packages("ROCR")
-library(ROCR)
+#library(ROCR)
 #pr <- prediction(predXG, adt[-adt_index,]$is_attributed)
-pr <- prediction(predXG, y[-adt_index])
-prf <- performance(pr, measure = "tpr", x.measure = "fpr")
-plot(prf)
-
-auc <- performance(pr, measure = "auc")
-auc <- auc@y.values[[1]]
-auc
-rm(auc, pr, prf, predXG2, dtest, dval, dtrain, adtr); gc()
-rm(adt_index, cols, predXG, tri, y); gc()
+#pr <- prediction(predXG, y[-adt_index])
+#prf <- performance(pr, measure = "tpr", x.measure = "fpr")
+#plot(prf)
+#auc <- performance(pr, measure = "auc")
+#auc <- auc@y.values[[1]]
+#auc
+#rm(auc, pr, prf, predXG, predXG2); gc()
+rm(adt_index, dtest, dval, dtrain, adtr, cols, tri, y); gc()
 ##### test data _ NOT RUN in Local #####
 adte <- fread("../input/test.csv")
 adte <- adte %>% select(-click_id)
