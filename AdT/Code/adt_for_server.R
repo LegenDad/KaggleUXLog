@@ -2,6 +2,7 @@ rm(list=ls()); gc()
 #adt <- adt[sample(.N, 30e6), ]
 library(data.table)
 adt <- fread("../input/train.csv")
+set.seed(777)
 adt <- adt[sample(.N, 35e6), ]
 library(lubridate)
 adt$click_hour <- hour(adt$click_time)
@@ -28,7 +29,6 @@ library(xgboost)
 library(caret)
 colnames(adt)
 colnames(adt[,-c(1,6:8)])
-set.seed(777)
 adt_index <- createDataPartition(adt$is_attributed, p=0.7, list = F)
 #y <- adt[adt_index,]$is_attributed
 y <- adt$is_attributed
