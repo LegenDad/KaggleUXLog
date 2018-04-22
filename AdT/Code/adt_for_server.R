@@ -102,7 +102,7 @@ adtest <- xgb.DMatrix(data = data.matrix(adte))
 rm(adte); gc()
 realpred <- predict(m_xgb, adtest)
 sub <- fread("../input/sample_submission.csv")
-sub$is_attributed <- realpred
+sub$is_attributed <- round(realpred, 6)
 fwrite(sub, paste0("adt", m_xgb$best_score, ".csv"))
 
 
