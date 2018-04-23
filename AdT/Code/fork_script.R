@@ -34,9 +34,8 @@ tr_te[, `:=`(yday = yday(click_time),
 
 #---------------------------
 cat("Preparing data...\n")
+tr_te[] <- lapply(tr_te, as.numeric)
 dtest <- xgb.DMatrix(data = data.matrix(tr_te[-tri]))
-
-
 #
 tr_te <- tr_te[tri]
 tri <- caret::createDataPartition(y, p = 0.9, list = F)
