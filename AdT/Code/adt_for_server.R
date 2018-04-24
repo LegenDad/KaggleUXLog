@@ -3,7 +3,7 @@ rm(list=ls()); gc()
 library(data.table)
 adt <- fread("../input/train.csv")
 set.seed(777)
-adt <- adt[sample(.N, 10e6), ]
+adt <- adt[sample(.N, 35e6), ]
 library(lubridate)
 adt$click_hour <- hour(adt$click_time)
 adt$click_weekd <- wday(adt$click_time)
@@ -20,11 +20,9 @@ adt <- adt %>% add_count(app)
 adt <- adt %>% add_count(device)
 adt <- adt %>% add_count(os)
 adt <- adt %>% add_count(channel)
-adt <- adt %>% add_count(ip, click_hour)
 head(adt)
-colnames(adt)[11:21] <- c("ip_hw", "ip_app", "ip_dev", "ip_os", "ip_ch", 
-                          "ip_cnt", "app_cnt", "dev_cnt", "os_cnt", "ch_cnt", 
-                          "ip_h")
+colnames(adt)[11:20] <- c("ip_hw", "ip_app", "ip_dev", "ip_os", "ip_ch", 
+                          "ip_cnt", "app_cnt", "dev_cnt", "os_cnt", "ch_cnt")
 colnames(adt)
 #install.packages("xgboost")
 library(xgboost)
@@ -95,11 +93,9 @@ adte <- adte %>% add_count(app)
 adte <- adte %>% add_count(device)
 adte <- adte %>% add_count(os)
 adte <- adte %>% add_count(channel)
-adte <- adte %>% add_count(ip, click_hour)
 head(adte)
-colnames(adte)[9:19] <- c("ip_hw", "ip_app", "ip_dev", "ip_os", "ip_ch", 
-                          "ip_cnt", "app_cnt", "dev_cnt", "os_cnt", "ch_cnt", 
-                          "ip_h")
+colnames(adte)[9:18] <- c("ip_hw", "ip_app", "ip_dev", "ip_os", "ip_ch", 
+                          "ip_cnt", "app_cnt", "dev_cnt", "os_cnt", "ch_cnt")
 adte <- adte %>% select(-ip, -click_time)
 adtest <- xgb.DMatrix(data = data.matrix(adte))
 rm(adte); gc()
