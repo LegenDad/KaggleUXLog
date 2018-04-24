@@ -1,0 +1,93 @@
+rm(list=ls()); gc()
+#adt <- adt[sample(.N, 30e6), ]
+library(data.table)
+adt <- fread("../input/train_sample.csv")
+library(lubridate)
+adt$click_hour <- hour(adt$click_time)
+adt$click_weekd <- wday(adt$click_time)
+library(dplyr)
+memory.size()
+colnames(adt)
+str(adt)
+adt <- adt %>% add_count(ip, click_hour, click_weekd) 
+adt <- adt %>% add_count(ip, app)
+adt <- adt %>% add_count(ip, device)
+adt <- adt %>% add_count(ip, os)
+adt <- adt %>% add_count(ip, channel)
+adt <- adt %>% add_count(ip)
+adt <- adt %>% add_count(app)
+adt <- adt %>% add_count(device)
+adt <- adt %>% add_count(os)
+adt <- adt %>% add_count(channel)
+head(adt)
+colnames(adt)[11:20] <- c("ip_hw", "ip_app", "ip_dev", "ip_os", "ip_ch", 
+                          "ip_cnt", "app_cnt", "dev_cnt", "os_cnt", "ch_cnt")
+colnames(adt)
+memory.size()
+install.packages("pryr")
+library(pryr)
+mem_used()
+memory.size()
+# 4      14      13      10       9       5      
+# 15      11       6
+te_hourG1 <- c(4, 14, 13, 10, 9, 5)
+te_hourG2 <- c(15, 11, 6)
+adt$h_div <- ifelse(adt$click_hour %in% te_hourG1, 1, 
+                    ifelse(adt$click_hour %in% te_hourG2, 2, 3))
+table(adt$h_div)
+is(adt$h_div)
+head(adt[, 15:21])
+#install.packages("xgboost")
+library(xgboost)
+library(caret)
+colnames(adt)
+colnames(adt[,-c(1,6:8)])
+set.seed(777)
+adt_index <- createDataPartition(adt$is_attributed, p=0.7, list = F)
+#y <- adt[adt_index,]$is_attributed
+y <- adt$is_attributed
+adtr <- adt %>% select(-ip, -click_time, -attributed_time, -is_attributed)
+colnames(adtr)
+dtest <- xgb.DMatrix(data = data.matrix(adtr[-adt_index,]))
+tri <- createDataPartition(y[adt_index], p = 0.9, list = F)
+dtrain <- xgb.DMatrix(data = data.matrix(adtr[adt_index,][tri,]), 
+                      label = y[adt_index][tri])
+dval <- xgb.DMatrix(data = data.matrix(adtr[adt_index,][-tri,]), 
+                    label = y[adt_index][-tri])
+cols <- colnames(adtr)
+rm(adt); gc()
+p <- list(objective = "binary:logistic",
+          booster = "gbtree",
+          eval_metric = "auc",
+          nthread = 8,
+          eta = 0.07,
+          max_depth = 7,
+          min_child_weight = 148,
+          gamma = 167.6125,
+          subsample = 0.6928,
+          colsample_bytree = 0.9108,
+          colsample_bylevel = 0.9857,
+          alpha = 43.2165,
+          lambda = 74.6334,
+          scale_pos_weight = 103,
+          nrounds = 3000)
+m_xgb <- xgb.train(p, dtrain, p$nrounds, list(val = dval), print_every_n = 10, 
+                   early_stopping_rounds = 300)
+
+(imp <- xgb.importance(cols, model=m_xgb))
+xgb.plot.importance(imp, top_n = 15)
+predXG <- predict(m_xgb,dtest)
+predXG2 <- ifelse(predXG > 0.85,1,0)
+sum(predXG2)
+library(e1071)
+confusionMatrix(as.factor(predXG2), as.factor(y[-adt_index]))
+#install.packages("ROCR")
+library(ROCR)
+#pr <- prediction(predXG, adt[-adt_index,]$is_attributed)
+pr <- prediction(predXG, y[-adt_index])
+prf <- performance(pr, measure = "tpr", x.measure = "fpr")
+plot(prf)
+
+auc <- performance(pr, measure = "auc")
+auc <- auc@y.values[[1]]
+auc
