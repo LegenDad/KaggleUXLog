@@ -60,7 +60,7 @@ m_xgb <- xgb.train(p, dtrain, p$nrounds, list(val = dval), print_every_n = 10,
                    early_stopping_rounds = 300)
 
 (imp <- xgb.importance(cols, model=m_xgb))
-xgb.plot.importance(imp, top_n = 10)
+xgb.plot.importance(imp, top_n = 15)
 predXG <- predict(m_xgb,dtest)
 predXG2 <- ifelse(predXG > 0.85,1,0)
 sum(predXG2)
