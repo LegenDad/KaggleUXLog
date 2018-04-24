@@ -33,8 +33,8 @@ adt_index <- createDataPartition(adt$is_attributed, p=0.7, list = F)
 y <- adt$is_attributed
 adtr <- adt %>% select(-ip, -click_time, -attributed_time, -is_attributed)
 colnames(adtr)
-dtest <- xgb.DMatrix(data = data.matrix(adtr[-adt_index,]))
 tri <- createDataPartition(y[adt_index], p = 0.9, list = F)
+dtest <- xgb.DMatrix(data = data.matrix(adtr[-adt_index,]))
 dtrain <- xgb.DMatrix(data = data.matrix(adtr[adt_index,][tri,]), 
                       label = y[adt_index][tri])
 dval <- xgb.DMatrix(data = data.matrix(adtr[adt_index,][-tri,]), 
@@ -76,3 +76,5 @@ plot(prf)
 auc <- performance(pr, measure = "auc")
 auc <- auc@y.values[[1]]
 auc
+library(pryr)
+mem_used()
