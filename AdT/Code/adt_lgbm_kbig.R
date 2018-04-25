@@ -35,6 +35,7 @@ params = list(objective = "binary",
 model_lgbm <- lgb.train(params, dtrain, valids = list(validation = dval), 
                         nthread = 8, nrounds = 3000, verbose = 1, 
                         early_stopping_rounds = 300, eval_freq = 10)
+#### error checking?? ###
 #str(model_lgbm)
 #model_lgbm$record_evals
 #model_lgbm$record_evals[["validation"]]
