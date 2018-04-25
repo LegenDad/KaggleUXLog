@@ -101,7 +101,7 @@ realpred <- predict(model_lgbm, adtest, n = model_lgbm$best_iter)
 rm(adte); gc()
 sub <- fread("../input/sample_submission.csv")
 sub$is_attributed <- round(realpred, 6)
-fwrite(sub, paste0("adt", round(model_lgbm$best_score), ".csv"))
+fwrite(sub, paste0("adt", round(model_lgbm$best_score, 6), ".csv"))
 
 
 #####
