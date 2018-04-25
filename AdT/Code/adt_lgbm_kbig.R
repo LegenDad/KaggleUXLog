@@ -57,7 +57,7 @@ library(knitr)
 kable(lgb.importance(model_lgbm))
 lgb.plot.importance(lgb.importance(model_lgbm), top_n = 15)
 mem_used()
-rm(adt_index, dtest, dval, dtrain, adtr, cols, tri, y); gc()
+rm(adt_index, dtest, dval, dtrain, adtr, tri, y); gc()
 ##### test data _ NOT RUN in Local #####
 adte <- readRDS("adte.RDS")
 adtest <- as.matrix(adte)
