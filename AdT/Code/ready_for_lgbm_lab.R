@@ -1,3 +1,8 @@
+train[, UsrappCount:=.N, by=list(ip,app,device,os)]
+train[, UsrappNewness:=1:.N, by=list(ip,app,device,os)]
+train[, UsrCount:=.N, by=list(ip,device,os)]
+train[, UsrNewness:=1:.N, by=list(ip,device,os)]
+
 library(devtools)
 install_github("Microsoft/LightGBM", subdir = "R-package")
 library(lightgbm)
