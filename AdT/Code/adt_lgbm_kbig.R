@@ -2,15 +2,16 @@ rm(list=ls()); gc()
 library(data.table)
 library(lubridate)
 library(dplyr)
-adt <- readRDS("adt_50e6")
+#adt <- readRDS("adt_50e6")
+adt <- readRDS("adt_180e6")
 set.seed(777)
 colnames(adt)
 library(caret)
 library(pryr)
-te_hourG1 <- c(4, 14, 13, 10, 9, 5)
-te_hourG2 <- c(15, 11, 6)
-adt$h_div <- ifelse(adt$click_hour %in% te_hourG1, 1, 
-                    ifelse(adt$click_hour %in% te_hourG2, 3, 2))
+#te_hourG1 <- c(4, 14, 13, 10, 9, 5)
+#te_hourG2 <- c(15, 11, 6)
+#adt$h_div <- ifelse(adt$click_hour %in% te_hourG1, 1, 
+#                    ifelse(adt$click_hour %in% te_hourG2, 3, 2))
 cat_f <- c("app", "device", "os", "channel")
 y <- adt$is_attributed
 adt_index <- createDataPartition(y, p = 0.7, list = F)
@@ -67,8 +68,8 @@ mem_used()
 rm(adt_index, dtest, dval, dtrain, adtr, tri, y); gc()
 ##### test data _ NOT RUN in Local #####
 adte <- readRDS("adte.RDS")
-adte$h_div <- ifelse(adte$click_hour %in% te_hourG1, 1, 
-                    ifelse(adte$click_hour %in% te_hourG2, 3, 2))
+#adte$h_div <- ifelse(adte$click_hour %in% te_hourG1, 1, 
+#                    ifelse(adte$click_hour %in% te_hourG2, 3, 2))
 adtest <- as.matrix(adte)
 realpred <- predict(model_lgbm, adtest, n = model_lgbm$best_iter)
 rm(adte); gc()
