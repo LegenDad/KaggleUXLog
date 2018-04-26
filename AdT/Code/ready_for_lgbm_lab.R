@@ -1,3 +1,10 @@
+DT = data.table(x=rep(c("b","a","c"),each=3), v=c(1,1,1,2,2,1,1,2,2), y=c(1,3,6), a=1:9, b=9:1)
+DT
+
+DT <- DT %>% add_count(x,v) 
+DT <- DT %>% group_by(x, v) %>% mutate(nn = 1:n())
+
+
 train[, UsrappCount:=.N, by=list(ip,app,device,os)]
 train[, UsrappNewness:=1:.N, by=list(ip,app,device,os)]
 train[, UsrCount:=.N, by=list(ip,device,os)]
