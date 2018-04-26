@@ -1,3 +1,4 @@
+#categorical_features = c("app", "device", "os", "channel", "hour")
 DT = data.table(x=rep(c("b","a","c"),each=3), v=c(1,1,1,2,2,1,1,2,2), y=c(1,3,6), a=1:9, b=9:1)
 DT
 
