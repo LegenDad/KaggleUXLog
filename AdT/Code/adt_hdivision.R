@@ -33,7 +33,7 @@ memory.size()
 te_hourG1 <- c(4, 14, 13, 10, 9, 5)
 te_hourG2 <- c(15, 11, 6)
 adt$h_div <- ifelse(adt$click_hour %in% te_hourG1, 1, 
-                    ifelse(adt$click_hour %in% te_hourG2, 2, 3))
+                    ifelse(adt$click_hour %in% te_hourG2, 3, 2))
 table(adt$h_div)
 is(adt$h_div)
 head(adt[, 15:21])

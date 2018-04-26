@@ -7,15 +7,22 @@ set.seed(777)
 colnames(adt)
 library(caret)
 library(pryr)
+te_hourG1 <- c(4, 14, 13, 10, 9, 5)
+te_hourG2 <- c(15, 11, 6)
+adt$h_div <- ifelse(adt$click_hour %in% te_hourG1, 1, 
+                    ifelse(adt$click_hour %in% te_hourG2, 3, 2))
+cat_f <- c("app", "device", "os", "channel")
 y <- adt$is_attributed
 adt_index <- createDataPartition(y, p = 0.7, list = F)
 tri <- createDataPartition(y[adt_index], p = 0.9, list = F)
 adtr <- adt %>% select(-ip, -click_time, -attributed_time, -is_attributed)
 library(lightgbm)
 dtrain <- lgb.Dataset(data = as.matrix(adtr[adt_index,][tri,]), 
-                      label = y[adt_index][tri])
+                      label = y[adt_index][tri], 
+                      categorical_feature = cat_f)
 dval <- lgb.Dataset(data = as.matrix(adtr[adt_index,][-tri,]), 
-                    label = y[adt_index][-tri])
+                    label = y[adt_index][-tri], 
+                    categorical_feature = cat_f)
 dtest <- as.matrix(adtr[-adt_index,])
 rm(adt); gc()
 mem_used()
@@ -44,22 +51,24 @@ model_lgbm$best_score
 model_lgbm$best_iter
 
 pred_lgbm <- predict(model_lgbm, dtest, n = model_lgbm$best_iter)
-pred_lgbm2 <- ifelse(pred_lgbm>0.8, 1, 0)
-confusionMatrix(as.factor(pred_lgbm2), as.factor(y[-adt_index]))
+#pred_lgbm2 <- ifelse(pred_lgbm>0.8, 1, 0)
+#confusionMatrix(as.factor(pred_lgbm2), as.factor(y[-adt_index]))
 
 library(ROCR)
 pr <- prediction(pred_lgbm, y[-adt_index])
 prf <- performance(pr, "tpr", "fpr")
-plot(prf)
+#plot(prf)
 auc <- performance(pr, "auc")
 (auc <- auc@y.values[[1]])
 library(knitr)
 kable(lgb.importance(model_lgbm))
-lgb.plot.importance(lgb.importance(model_lgbm), top_n = 15)
+#lgb.plot.importance(lgb.importance(model_lgbm), top_n = 15)
 mem_used()
 rm(adt_index, dtest, dval, dtrain, adtr, tri, y); gc()
 ##### test data _ NOT RUN in Local #####
 adte <- readRDS("adte.RDS")
+adte$h_div <- ifelse(adte$click_hour %in% te_hourG1, 1, 
+                    ifelse(adte$click_hour %in% te_hourG2, 3, 2))
 adtest <- as.matrix(adte)
 realpred <- predict(model_lgbm, adtest, n = model_lgbm$best_iter)
 rm(adte); gc()
