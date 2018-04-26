@@ -20,13 +20,25 @@ head(adt)
 colnames(adt)[11:20] <- c("ip_hw", "ip_app", "ip_dev", "ip_os", "ip_ch", 
                           "ip_cnt", "app_cnt", "dev_cnt", "os_cnt", "ch_cnt")
 colnames(adt)
+#te_hourG1 <- c(4, 14, 13, 10, 9, 5)
+#te_hourG2 <- c(15, 11, 6)
+#adt$h_div <- ifelse(adt$click_hour %in% te_hourG1, 1, 
+#                    ifelse(adt$click_hour %in% te_hourG2, 3, 2))
+adt <- adt %>% add_count(ip, device, os)
+adt <- adt %>% add_count(ip, device, os, app)
+colnames(adt)[21:22] <- c("clicker", "clicker_app")
 
+adt <- adt %>% group_by(ip, device, os) %>% mutate(clicker_N = 1:n())
+adt <- adt %>% group_by(ip, device, os, app) %>% mutate(clicker_app_N = 1:n())
+colnames(adt)
+#head(adt[, 19:24])  
 library(caret)
 set.seed(777)
 y <- adt$is_attributed
 adt_index <- createDataPartition(y, p = 0.7, list = F)
 tri <- createDataPartition(y[adt_index], p = 0.9, list = F)
-cat_f <- c("app", "device", "os", "channel")
+cat_f <- c("app", "device", "os", "channel", "click_hour")
+adt <- as.data.table(adt)
 adtr <- adt %>% select(-ip, -click_time, -attributed_time, -is_attributed)
 
 library(lightgbm)
