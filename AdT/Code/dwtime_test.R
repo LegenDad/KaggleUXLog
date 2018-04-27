@@ -3,9 +3,9 @@ library(data.table)
 adt <- fread("../input/train_sample.csv")
 library(lubridate)
 colnames(adt)
-
 adt$click_time <- as.POSIXct(adt$click_time)
-adt$attributed_time <- ifelse(adt$is_attributed ==0, "2017-12-31 23:59:59", adt$attributed_time)
+adt$attributed_time <- ifelse(adt$is_attributed ==0, "2017-11-06 00:00:00",
+                              adt$attributed_time)
 adt$attributed_time <- as.POSIXct(adt$attributed_time)
 head(adt)
 head(adt[adt$is_attributed ==1 , ])
@@ -17,7 +17,7 @@ adt$down_time <- as.integer(adt$down_time)
 range(adt$down_time)
 table(adt$down_time)
 #46341 4521608
-adt$down_time <- ifelse(adt$down_time > 4500000, 4500000, adt$down_time)
+adt$down_time <- ifelse(adt$down_time < 0, 0, adt$down_time)
 colnames(adt)
 library(dplyr)
 colnames(adt)
@@ -88,7 +88,7 @@ model_lgbm$best_score
 model_lgbm$best_iter
 
 pred_lgbm <- predict(model_lgbm, dtest, n = model_lgbm$best_iter)
-pred_lgbm2 <- ifelse(pred_lgbm>0.8, 1, 0)
+pred_lgbm2 <- ifelse(pred_lgbm>0.5, 1, 0)
 confusionMatrix(as.factor(pred_lgbm2), as.factor(y[-adt_index]))
 
 library(ROCR)
