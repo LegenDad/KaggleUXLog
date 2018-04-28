@@ -1,6 +1,7 @@
 rm(list=ls()); gc()
 library(data.table)
-adt <- fread("../input/train_sample.csv")
+adt <- fread("../input/train.csv")
+adt <- adt[sample(.N, 10e6), ]
 adt$click_time <- as.POSIXct(adt$click_time)
 range(adt$click_time)
 adt$attributed_time <- ifelse(adt$is_attributed == 0, "2017-11-06 00:00:00", 
@@ -31,11 +32,11 @@ adt$down_time <- adt$attributed_time - adt$click_time
 adt$down_time <- as.integer(adt$down_time)
 range(adt$down_time)
 adt$down_time <- ifelse(adt$down_time < 0, 0, adt$down_time)
+colnames(adt)
 adt$down_time <- adt$down_time / 60
 adt$down_time <- ifelse(0<adt$down_time & adt$down_time<1 , 1, adt$down_time)
 adt$down_time <- round(adt$down_time)
 table(adt$down_time)
-colnames(adt)
 
 library(caret)
 set.seed(777)
@@ -43,6 +44,7 @@ y <- adt$is_attributed
 adt_index <- createDataPartition(y, p = 0.7, list = F)
 tri <- createDataPartition(y[adt_index], p = 0.9, list = F)
 cat_f <- c("app", "device", "os", "channel", "click_hour")
+
 library(lightgbm)
 dt_y <- adt$down_time
 adtr <- adt[, c("ip", "click_time", "attributed_time", "is_attributed") := NULL]
@@ -80,7 +82,6 @@ pred_dt <- ifelse(pred_dt <0, 0, pred_dt)
 adte$down_time <- as.integer(pred_dt)
 
 dtest <- as.matrix(adte)
-
 dtrain <- lgb.Dataset(data = as.matrix(adtr[adt_index,][tri,]), 
                       label = y[adt_index][tri], 
                       categorical_feature = cat_f)
