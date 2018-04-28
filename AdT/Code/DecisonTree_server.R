@@ -24,7 +24,8 @@ head(adt)
 colnames(adt)[11:20] <- c("ip_hw", "ip_app", "ip_dev", "ip_os", "ip_ch", 
                           "ip_cnt", "app_cnt", "dev_cnt", "os_cnt", "ch_cnt")
 colnames(adt)
-adt_index <- caret::createDataPartition(adt$is_attributed, p=0.7, list = F)
+library(caret)
+adt_index <- createDataPartition(adt$is_attributed, p=0.7, list = F)
 y <- adt$is_attributed
 adtr <- adt %>% select(-ip, -click_time, -attributed_time)
 adte <- adtr[-adt_index,]
@@ -33,20 +34,8 @@ colnames(adte) == colnames(adtr)
 table(adtr$is_attributed); table(adte$is_attributed)
 str(adtr)
 rm(adt); gc()
-
-glm <- glm(as.factor(is_attributed)~., family = binomial, adtr)
-pred_glm <- predict(glm, adte, type = "response")
-
 library(e1071)
 library(ROCR)
-pr <- prediction(pred_glm, y[-adt_index])
-prf <- performance(pr, "tpr", "fpr")
-plot(prf)
-auc <- performance(pr, "auc")
-(auc <- auc@y.values[[1]])
-
-
-##### Decision Tree #####
 library(rpart)
 pred_tree <- rpart(as.factor(is_attributed)~., adtr, method = "class")
 summary(pred_tree)
@@ -58,8 +47,6 @@ prf2 <- performance(pr2, "tpr", "fpr")
 plot(prf2)
 auc2 <- performance(pr2, "auc")
 (auc2 <- auc2@y.values[[1]])
-cat("glm auc:", auc)
-cat("tree auc:", auc2)
 rm(adtr, adte); gc()
 ##### test data _ NOT RUN in Local #####
 adte <- fread("../input/test.csv")
@@ -80,17 +67,10 @@ head(adte)
 colnames(adte)[9:18] <- c("ip_hw", "ip_app", "ip_dev", "ip_os", "ip_ch", 
                           "ip_cnt", "app_cnt", "dev_cnt", "os_cnt", "ch_cnt")
 adte <- adte %>% select(-ip, -click_time)
-
-realglm <- predict(glm, adte, type = "response")
 realtree <- predict(pred_tree, adte, type = "prob")[,2]
-
-sub <- fread("../input/sample_submission.csv")
-sub$is_attributed <- round(realglm, 6)
-fwrite(sub, paste0("adt_glm_", auc, ".csv"))
-
 sub <- fread("../input/sample_submission.csv")
 sub$is_attributed <- round(realtree, 6)
-fwrite(sub, paste0("adt_tree_", auc2, ".csv"))
+fwrite(sub, paste0("adt_tree_", round(auc2, 6), ".csv"))
 
 
 #####
