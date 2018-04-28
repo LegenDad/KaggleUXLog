@@ -1,60 +1,45 @@
 rm(list=ls()); gc()
 library(data.table)
 adt <- fread("../input/train_sample.csv")
-library(lubridate)
-colnames(adt)
 adt$click_time <- as.POSIXct(adt$click_time)
-adt$attributed_time <- ifelse(adt$is_attributed ==0, "2017-11-06 00:00:00",
+range(adt$click_time)
+adt$attributed_time <- ifelse(adt$is_attributed == 0, "2017-11-06 00:00:00", 
                               adt$attributed_time)
 adt$attributed_time <- as.POSIXct(adt$attributed_time)
-head(adt)
-head(adt[adt$is_attributed ==1 , ])
+library(lubridate)
+adt[, click_hour := hour(click_time)]
+adt[, click_weekd := wday(click_time)]
+adt[, ip_hw := .N, by = list(ip, click_hour, click_weekd)]
+adt[, ip_app := .N, by = list(ip, app)]
+adt[, ip_dev := .N, by = list(ip, device)]
+adt[, ip_os := .N, by = list(ip, os)]
+adt[, ip_ch := .N, by = list(ip, channel)]
+adt[, ip_cnt := .N, by = ip]
+adt[, app_cnt := .N, by = app]
+adt[, dev_cnt := .N, by = device]
+adt[, os_cnt := .N, by = os]
+adt[, ch_cnt := .N, by = channel]
+dim(adt)
+colnames(adt)
+adt[, clicker := .N, by = list(ip, device, os)]
+adt[, clicker_app := .N, by = list(ip, device, os, app)]
+adt[, clicker_N := 1:.N, by = list(ip, device, os)]
+adt[, clicker_app_N := 1:.N, by = list(ip, device, os, app)]
+dim(adt)
+colnames(adt)
 adt$down_time <- adt$attributed_time - adt$click_time
-str(adt$down_time)
-adt$click_hour <- hour(adt$click_time)
-adt$click_weekd <- wday(adt$click_time)
 adt$down_time <- as.integer(adt$down_time)
 range(adt$down_time)
-table(adt$down_time)
-#46341 4521608
 adt$down_time <- ifelse(adt$down_time < 0, 0, adt$down_time)
 colnames(adt)
-library(dplyr)
-colnames(adt)
-adt <- adt %>% add_count(ip, click_hour, click_weekd)
-adt <- adt %>% add_count(ip, app)
-adt <- adt %>% add_count(ip, device)
-adt <- adt %>% add_count(ip, os)
-adt <- adt %>% add_count(ip, channel)
-adt <- adt %>% add_count(ip)
-adt <- adt %>% add_count(app)
-adt <- adt %>% add_count(device)
-adt <- adt %>% add_count(os)
-adt <- adt %>% add_count(channel)
-head(adt)
-colnames(adt)[12:21] <- c("ip_hw", "ip_app", "ip_dev", "ip_os", "ip_ch", 
-                          "ip_cnt", "app_cnt", "dev_cnt", "os_cnt", "ch_cnt")
-colnames(adt)
-#te_hourG1 <- c(4, 14, 13, 10, 9, 5)
-#te_hourG2 <- c(15, 11, 6)
-#adt$h_div <- ifelse(adt$click_hour %in% te_hourG1, 1, 
-#                    ifelse(adt$click_hour %in% te_hourG2, 3, 2))
-adt <- adt %>% add_count(ip, device, os)
-adt <- adt %>% add_count(ip, device, os, app)
-colnames(adt)[22:23] <- c("clicker", "clicker_app")
 
-adt <- adt %>% group_by(ip, device, os) %>% mutate(clicker_N = 1:n())
-adt <- adt %>% group_by(ip, device, os, app) %>% mutate(clicker_app_N = 1:n())
-colnames(adt)
-#head(adt[, 19:24])  
 library(caret)
 set.seed(777)
 y <- adt$is_attributed
 adt_index <- createDataPartition(y, p = 0.7, list = F)
 tri <- createDataPartition(y[adt_index], p = 0.9, list = F)
 cat_f <- c("app", "device", "os", "channel", "click_hour")
-adt <- as.data.table(adt)
-adtr <- adt %>% select(-ip, -click_time, -attributed_time, -is_attributed)
+adtr <- adt[, c("ip", "click_time", "attributed_time", "is_attributed") := NULL]
 
 library(lightgbm)
 dtrain <- lgb.Dataset(data = as.matrix(adtr[adt_index,][tri,]), 
@@ -80,10 +65,6 @@ params = list(objective = "binary",
 model_lgbm <- lgb.train(params, dtrain, valids = list(validation = dval), 
                         nthread = 8, nrounds = 3000, verbose = 1, 
                         early_stopping_rounds = 300, eval_freq = 10)
-#str(model_lgbm)
-#model_lgbm$record_evals
-#model_lgbm$record_evals[["validation"]]
-#model_lgbm$record_evals[["validation"]][["auc"]][["eval"]]
 model_lgbm$best_score
 model_lgbm$best_iter
 
@@ -102,4 +83,7 @@ kable(lgb.importance(model_lgbm))
 lgb.plot.importance(lgb.importance(model_lgbm), top_n = 15)
 library(pryr)
 mem_used()
+
+
+
 
