@@ -1,7 +1,7 @@
 rm(list=ls()); gc()
 library(data.table)
 adt <- fread("../input/train.csv")
-adt <- adt[sample(.N, 20e6), ]
+adt <- adt[sample(.N, 30e6), ]
 #adt <- adt[sample(.N, 10e6), ]
 adt$click_time <- as.POSIXct(adt$click_time)
 range(adt$click_time)
