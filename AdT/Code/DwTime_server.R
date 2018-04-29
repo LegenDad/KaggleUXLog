@@ -128,7 +128,7 @@ lgb.plot.importance(lgb.importance(model_lgbm), top_n = 15)
 library(pryr)
 mem_used()
 rm(dtest, dtrain, dval, adte, adtr); gc()
-
+rm(y, adt_index, tri, dt_y, pred_dt, pred_lgbm); gc()
 
 ##### test data #####
 adte <- fread("../input/test.csv")
