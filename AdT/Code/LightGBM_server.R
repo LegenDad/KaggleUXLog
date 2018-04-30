@@ -25,13 +25,17 @@ adt[, clicker := .N, by = list(ip, device, os)]
 adt[, clicker_app := .N, by = list(ip, device, os, app)]
 adt[, clicker_N := seq(.N), by = list(ip, device, os)]
 adt[, clicker_app_N := seq(.N), by = list(ip, device, os, app)]
+adt[, app_dev := .N, by = list(app, device)]
+adt[, app_os := .N, by = list(app, os)]
+adt[, app_ch := .N, by = list(app, channel)]
+
 dim(adt)
 colnames(adt)
 
-te_hourG1 <- c(4, 14, 13, 10, 9, 5)
-te_hourG2 <- c(15, 11, 6)
-adt$h_div <- ifelse(adt$click_hour %in% te_hourG1, 1, 
-                    ifelse(adt$click_hour %in% te_hourG2, 3, 2))
+#te_hourG1 <- c(4, 14, 13, 10, 9, 5)
+#te_hourG2 <- c(15, 11, 6)
+#adt$h_div <- ifelse(adt$click_hour %in% te_hourG1, 1, 
+#                    ifelse(adt$click_hour %in% te_hourG2, 3, 2))
 colnames(adt)
 
 library(caret)
@@ -105,10 +109,14 @@ adte[, clicker := .N, by = list(ip, device, os)]
 adte[, clicker_app := .N, by = list(ip, device, os, app)]
 adte[, clicker_N := seq(.N), by = list(ip, device, os)]
 adte[, clicker_app_N := seq(.N), by = list(ip, device, os, app)]
+adte[, app_dev := .N, by = list(app, device)]
+adte[, app_os := .N, by = list(app, os)]
+adte[, app_ch := .N, by = list(app, channel)]
+
 dim(adte)
 colnames(adte)
-adte$h_div <- ifelse(adte$click_hour %in% te_hourG1, 1, 
-                    ifelse(adte$click_hour %in% te_hourG2, 3, 2))
+#adte$h_div <- ifelse(adte$click_hour %in% te_hourG1, 1, 
+#                    ifelse(adte$click_hour %in% te_hourG2, 3, 2))
 colnames(adte)
 adte <- adte[, -c("click_id", "ip", "click_time")]
 colnames(adte)
