@@ -1,27 +1,25 @@
-head(adt)
-head(adtr[adt_index,][tri,])
-head(adtr[adt_index,][tri,][,-"down_time"])
-adt$down_time <- round(adt$down_time / 60)
-dt_y <- adt$down_time
 ##### XGBoost #####
 library(xgboost)
 dttrain <- xgb.DMatrix(data = data.matrix(adtr[adt_index,][tri,][,-"down_time"]), 
                        label = dt_y[adt_index][tri])
 dtval <- xgb.DMatrix(data = data.matrix(adtr[adt_index,][-tri,][,-"down_time"]), 
                      label = dt_y[adt_index][-tri])
-dttest <- xgb.DMatrix(data = data.matrix(adtr[-adt_index,]))
+dttest <- xgb.DMatrix(data = data.matrix(adtr[-adt_index,][,-"down_time"]))
 m_xgb <- xgb.train(data = dttrain, nrounds = 150, max_depth = 5, 
                    eta =0.1, subsample = 0.9)
 
-xgb.importance(feature_names = colnames(dttrain), m_xgb) %>% xgb.plot.importance()
+#xgb.importance(feature_names = colnames(dttrain), m_xgb) %>% xgb.plot.importance()
 predXG <- predict(m_xgb, dttest)
 sqrt(mean((dt_y[-adt_index] - predXG)^2))
 range(dt_y[-adt_index])
 range(predXG)
-predXG <- ifelse(predXG < 0, 0, as.integer(predXG))
-colnames(adtr)
-adte <- adtr[-adt_index]
-adte$down_time <- as.integer(predXG)
+#predXG <- ifelse(predXG < 0, 0, round(predXG))
+predXG <- ifelse(predXG < 0, 0, predXG)
+predXG <- as.integer(predXG)
+tail(table(predXG))
+table(predXG, adte$down_time)
+confusionMatrix(factor(predXG), factor(adte$down_time))
+adte$down_time <- predXG
 library(lightgbm)
 dtest <- as.matrix(adte)
 dtrain <- lgb.Dataset(data = as.matrix(adtr[adt_index,][tri,]), 
@@ -72,9 +70,7 @@ mem_used()
 
 
 ###### LM #####
-dt_y <- adt$down_time
 lm <- lm(down_time~. ,data = adtr[adt_index,])
-summary(lm)
 pred_lm <- predict(lm, adtr[-adt_index,])
 range(pred_lm)
 pred_lm <- ifelse(pred_lm <0, 0, pred_lm)
@@ -129,6 +125,12 @@ lgb.plot.importance(lgb.importance(model_lgbm), top_n = 15)
 library(pryr)
 mem_used()
 
+##### Multinorm #####
+library(nnet)
+lm <- multinom(factor(down_time)~. ,adtr[adt_index,])
+pred_lm <- predict(lm, adte)
+table(pred_lm)
+confusionMatrix(factor(pred_lm), factor(adte$down_time))
 ##### LightGBM #####
 library(lightgbm)
 dt_y <- adt$down_time
