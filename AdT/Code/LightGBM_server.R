@@ -41,19 +41,27 @@ colnames(adt)
 library(caret)
 set.seed(777)
 y <- adt$is_attributed
-adt_index <- createDataPartition(y, p = 0.7, list = F)
-tri <- createDataPartition(y[adt_index], p = 0.9, list = F)
+idx <- createDataPartition(y, p= 0.9, list = F)
+#adt_index <- createDataPartition(y, p = 0.7, list = F)
+#tri <- createDataPartition(y[adt_index], p = 0.9, list = F)
 cat_f <- c("app", "device", "os", "channel", "click_hour")
 adtr <- adt[, -c("ip", "click_time", "attributed_time", "is_attributed")]
 
 library(lightgbm)
-dtrain <- lgb.Dataset(data = as.matrix(adtr[adt_index,][tri,]), 
-                      label = y[adt_index][tri],
+#dtrain <- lgb.Dataset(data = as.matrix(adtr[adt_index,][tri,]), 
+#                      label = y[adt_index][tri],
+#                      categorical_feature = cat_f)
+#dval <- lgb.Dataset(data = as.matrix(adtr[adt_index,][-tri,]), 
+#                    label = y[adt_index][-tri], 
+#                    categorical_feature = cat_f)
+#dtest <- as.matrix(adtr[-adt_index,])
+dtrain <- lgb.Dataset(data = as.matrix(adtr[idx,]), 
+                      label = y[idx],
                       categorical_feature = cat_f)
-dval <- lgb.Dataset(data = as.matrix(adtr[adt_index,][-tri,]), 
-                    label = y[adt_index][-tri], 
+dval <- lgb.Dataset(data = as.matrix(adtr[-idx,]), 
+                    label = y[-idx], 
                     categorical_feature = cat_f)
-dtest <- as.matrix(adtr[-adt_index,])
+
 rm(adt); gc()
 params = list(objective = "binary", 
               metric = "auc", 
@@ -74,22 +82,23 @@ model_lgbm <- lgb.train(params, dtrain, valids = list(validation = dval),
 model_lgbm$best_score
 model_lgbm$best_iter
 
-pred_lgbm <- predict(model_lgbm, dtest, n = model_lgbm$best_iter)
+#pred_lgbm <- predict(model_lgbm, dtest, n = model_lgbm$best_iter)
 #pred_lgbm2 <- ifelse(pred_lgbm>0.8, 1, 0)
 #confusionMatrix(as.factor(pred_lgbm2), as.factor(y[-adt_index]))
 
-library(ROCR)
-pr <- prediction(pred_lgbm, y[-adt_index])
+#library(ROCR)
+#pr <- prediction(pred_lgbm, y[-adt_index])
 #prf <- performance(pr, "tpr", "fpr")
 #plot(prf)
-auc <- performance(pr, "auc")
-(auc <- auc@y.values[[1]])
+#auc <- performance(pr, "auc")
+#(auc <- auc@y.values[[1]])
 library(knitr)
 kable(lgb.importance(model_lgbm))
 lgb.plot.importance(lgb.importance(model_lgbm), top_n = 15)
 library(pryr)
 mem_used()
-rm(adt_index, dtest, dval, dtrain, adtr, tri, y); gc()
+#rm(adt_index, dtest, dval, dtrain, adtr, tri, y); gc()
+rm(adt_index, dtest, dval, dtrain, adtr, idx, y); gc()
 
 ##### test data #####
 adte <- fread("../input/test.csv")
@@ -124,7 +133,7 @@ adte <- as.matrix(adte)
 realpred <- predict(model_lgbm, adte, n = model_lgbm$best_iter)
 sub <- fread("../input/sample_submission.csv")
 sub$is_attributed <- round(realpred, 6)
-fwrite(sub, paste0("AdT_", round(auc, 6), ".csv"))
+fwrite(sub, paste0("AdT_", round(model_lgbm$best_score, 6), ".csv"))
 
 
 ##### END #####
