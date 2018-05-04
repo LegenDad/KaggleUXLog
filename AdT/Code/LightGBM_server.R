@@ -4,8 +4,8 @@ adt <- fread("../input/train.csv")
 
 #Select Train Sizes
 set.seed(777)
-adt <- adt[sample(.N, 50e6), ]
-#adt <- adt[sample(.N, 20e6), ]
+#adt <- adt[sample(.N, 50e6), ]
+adt <- adt[sample(.N, 60e6), ]
 #adt <- adt[sample(.N, 30e6), ]
 
 library(lubridate)
@@ -99,7 +99,7 @@ lgb.plot.importance(lgb.importance(model_lgbm), top_n = 15)
 library(pryr)
 mem_used()
 #rm(adt_index, dtest, dval, dtrain, adtr, tri, y); gc()
-rm(adt_index, dtest, dval, dtrain, adtr, idx, y); gc()
+rm(dval, dtrain, adtr, idx, y); gc()
 
 ##### test data #####
 adte <- fread("../input/test.csv")
