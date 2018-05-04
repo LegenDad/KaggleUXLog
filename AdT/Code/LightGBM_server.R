@@ -67,15 +67,16 @@ params = list(objective = "binary",
               metric = "auc", 
               learning_rate= 0.1, 
               num_leaves= 7,
-              max_depth= 4,
+              max_depth= 3,  #change:4 to 3
               min_child_samples= 100,
               max_bin= 100,
               subsample= 0.7,
               subsample_freq= 1,
-              colsample_bytree= 0.7,
+              colsample_bytree= 0.9, #change : 0.7 to 0.9
               min_child_weight= 0,
               min_split_gain= 0,
-              scale_pos_weight=99.7)
+              scale_pos_weight=200 #change : 99.7 to 200
+              )
 model_lgbm <- lgb.train(params, dtrain, valids = list(validation = dval), 
                         nthread = 8, nrounds = 2000, verbose = 1, 
                         early_stopping_rounds = 200, eval_freq = 10)
