@@ -35,7 +35,13 @@ adt[, clicker_ch_Next := c(click_time[-1], NA), by = .(ip, device, os, app, chan
 adt[, clicker_ch_Next := clicker_ch_Next - click_time, 
     by = .(ip, device, os,app,channel)]
 adt[is.na(clicker_ch_Next), clicker_ch_Next := 0]
-
+adt[, clicker_prev := click_time - shift(click_time), by = .(ip, device, os)]
+adt[is.na(clicker_prev), clicker_prev := 0]
+adt[, clicker_app_prev := click_time - shift(click_time), by = .(ip, device, os, app)]
+adt[is.na(clicker_app_prev), clicker_app_prev := 0]
+adt[, clicker_ch_prev := click_time - shift(click_time), 
+    by = .(ip, device, os, app, channel)]
+adt[is.na(clicker_ch_prev), clicker_ch_prev := 0]
 #adt[, clicker_Next := shift(click_time, 1, type = "lead", fill = 0) - click_time, 
 #    by = .(ip, device, os)]
 #adt[, clicker_app_Next := shift(click_time, 1, type = "lead", fill = 0) - click_time, 
@@ -80,7 +86,7 @@ params = list(objective = "binary",
               metric = "auc", 
               learning_rate= 0.1, 
               num_leaves= 7,
-              max_depth= 4,
+              max_depth= 3,
               min_child_samples= 100,
               max_bin= 100,
               subsample= 0.7,
