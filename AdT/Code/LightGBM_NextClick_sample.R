@@ -26,12 +26,14 @@ adt[, app_dev := .N, by = list(app, device)]
 adt[, app_os := .N, by = list(app, os)]
 adt[, app_ch := .N, by = list(app, channel)]
 adt[, clicker_Next := shift(click_time, 1, type = "lead", fill = 0) - click_time, 
-    by = list(ip, device, os)]
-adt[, clicker_app_Next := shift(click_time, 1, type = "lead", fill = 0) - click_time, by = list(ip, device, os, app)]
-adt[, clicker_ch_Next := shift(click_time, 1, type = "lead", fill = 0) - click_time, by = .(ip, device, os, app, channel)]
-#adt$clicker_Next <- ifelse(adt$clicker_Next < 0 , 0 , adt$clicker_Next)
-#adt$clicker_app_Next <- ifelse(adt$clicker_app_Next <0 , 0 , adt$clicker_app_Next)
-#adt$clicker_ch_Next <- ifelse(adt$clicker_ch_Next <0 , 0 , adt$clicker_ch_Next)
+    by = .(ip, device, os)]
+adt[, clicker_app_Next := shift(click_time, 1, type = "lead", fill = 0) - click_time, 
+    by = .(ip, device, os, app)]
+adt[, clicker_ch_Next := shift(click_time, 1, type = "lead", fill = 0) - click_time, 
+    by = .(ip, device, os, app, channel)]
+adt$clicker_Next <- ifelse(adt$clicker_Next < 0 , 0 , adt$clicker_Next)
+adt$clicker_app_Next <- ifelse(adt$clicker_app_Next <0 , 0 , adt$clicker_app_Next)
+adt$clicker_ch_Next <- ifelse(adt$clicker_ch_Next <0 , 0 , adt$clicker_ch_Next)
 #fav_appG1 <- c(3, 12, 2)
 #fav_appG2 <- c(9, 15, 18, 14)
 #adt$fav_app_div <- ifelse(adt$click_hour %in% fav_appG1, 1, 
