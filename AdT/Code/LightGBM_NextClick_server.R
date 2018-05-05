@@ -1,9 +1,12 @@
 rm(list=ls()); gc()
 library(data.table)
-adt <- fread("../input/train.csv")
+adt <- fread("../input/train.csv", skip = 134903891, 
+             col.names = c("ip", "app", "device", "os", "channel", 
+                           "click_time", "attributed_time", "is_attributed"))
+#adt <- fread("../input/train.csv")
 #Select Train Sizes
-set.seed(777)
-adt <- adt[sample(.N, 50e6), ]
+#set.seed(777)
+#adt <- adt[sample(.N, 50e6), ]
 #adt <- adt[sample(.N, 10e6), ]
 #adt <- adt[sample(.N, 30e6), ]
 library(lubridate)
@@ -83,10 +86,10 @@ params = list(objective = "binary",
               max_bin= 100,
               subsample= 0.7,
               subsample_freq= 1,
-              colsample_bytree= 0.9, #change : 0.7 to 0.9
+              colsample_bytree= 0.7, #change : 0.7 to 0.9
               min_child_weight= 0,
               min_split_gain= 0,
-              scale_pos_weight=200 #change : 99.7 to 200
+              scale_pos_weight=99.7 #change : 99.7 to 200
               )
 model_lgbm <- lgb.train(params, dtrain, valids = list(validation = dval), 
                         nthread = 8, nrounds = 2000, verbose = 1, 
