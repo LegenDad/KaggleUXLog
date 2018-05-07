@@ -7,7 +7,7 @@ tr <- fread("../input/train.csv")
 #Select Train Sizes
 set.seed(777)
 #tr <- tr[sample(.N, 50e6), ]
-tr <- tr[sample(.N, 50e6), ]
+#tr <- tr[sample(.N, 50e6), ]
 #adt <- adt[sample(.N, 30e6), ]
 te <- fread("../input/test.csv")
 
@@ -105,7 +105,8 @@ dtrain <- lgb.Dataset(data = as.matrix(adtr[tri][idx,]),
 dval <- lgb.Dataset(data = as.matrix(adtr[tri][-idx,]), 
                     label = y[-idx], 
                     categorical_feature = cat_f)
-
+rm(adtr); gc()
+mem_used()
 
 params = list(objective = "binary", 
               metric = "auc", 
@@ -122,8 +123,8 @@ params = list(objective = "binary",
               scale_pos_weight=99.7 #change : 99.7 to 200
 )
 model_lgbm <- lgb.train(params, dtrain, valids = list(validation = dval), 
-                        nthread = 8, nrounds = 2000, verbose = 1, 
-                        early_stopping_rounds = 200, eval_freq = 10)
+                        nthread = 8, nrounds = 1000, verbose = 1, 
+                        early_stopping_rounds = 100, eval_freq = 10)
 model_lgbm$best_score
 model_lgbm$best_iter
 
@@ -143,76 +144,11 @@ lgb.plot.importance(lgb.importance(model_lgbm), top_n = 15)
 library(pryr)
 mem_used()
 #rm(adt_index, dtest, dval, dtrain, adtr, tri, y); gc()
-rm(dval, dtrain, adtr, idx, y); gc()
+rm(dval, dtrain, idx, y); gc()
+mem_used()
 
 realpred <- predict(model_lgbm, adte, n = model_lgbm$best_iter)
 sub <- fread("../input/sample_submission.csv")
 sub$is_attributed <- round(realpred, 6)
 fwrite(sub, paste0("AdT_T_NPC_", round(model_lgbm$best_score, 6), ".csv"))
 
-
-##### test data #####
-adte <- fread("../input/test.csv")
-adte <- setorder(adte, click_time)
-adte[, click_hour := hour(adte$click_time)]
-adte[, click_weekd := wday(adte$click_time)]
-adte$click_time <- as.numeric(ymd_hms(adte$click_time))
-adte[, ip_hw := .N, by = list(ip, click_hour, click_weekd)]
-adte[, ip_app := .N, by = list(ip, app)]
-adte[, ip_dev := .N, by = list(ip, device)]
-adte[, ip_os := .N, by = list(ip, os)]
-adte[, ip_ch := .N, by = list(ip, channel)]
-adte[, ip_cnt := .N, by = ip]
-adte[, app_cnt := .N, by = app]
-adte[, dev_cnt := .N, by = device]
-adte[, os_cnt := .N, by = os]
-adte[, ch_cnt := .N, by = channel]
-adte[, clicker := .N, by = list(ip, device, os)]
-adte[, clicker_app := .N, by = list(ip, device, os, app)]
-adte[, clicker_N := seq(.N), by = list(ip, device, os)]
-adte[, clicker_app_N := seq(.N), by = list(ip, device, os, app)]
-adte[, app_dev := .N, by = list(app, device)]
-adte[, app_os := .N, by = list(app, os)]
-adte[, app_ch := .N, by = list(app, channel)]
-adte[, clicker_Next := c(click_time[-1], NA), by = .(ip, device, os)]
-adte[, clicker_Next := clicker_Next - click_time, by = .(ip, device, os)]
-adte[is.na(clicker_Next), clicker_Next := 0]
-adte[, clicker_app_Next := c(click_time[-1], NA), by = .(ip, device, os, app)]
-adte[, clicker_app_Next := clicker_app_Next - click_time, by = .(ip, device, os, app)]
-adte[is.na(clicker_app_Next), clicker_app_Next := 0]
-adte[, clicker_ch_Next := c(click_time[-1], NA), by = .(ip, device, os, app, channel)]
-adte[, clicker_ch_Next := clicker_ch_Next - click_time, 
-     by = .(ip, device, os,app,channel)]
-adte[is.na(clicker_ch_Next), clicker_ch_Next := 0]
-adte[, clicker_prev := click_time - shift(click_time), by = .(ip, device, os)]
-adte[is.na(clicker_prev), clicker_prev := 0]
-adte[, clicker_app_prev := click_time - shift(click_time), by = .(ip, device, os, app)]
-adte[is.na(clicker_app_prev), clicker_app_prev := 0]
-adte[, clicker_ch_prev := click_time - shift(click_time), 
-     by = .(ip, device, os, app, channel)]
-adte[is.na(clicker_ch_prev), clicker_ch_prev := 0]
-
-#adte[, clicker_Next := shift(click_time, 1, type = "lead", fill = 0) - click_time, 
-#    by = .(ip, device, os)]
-#adte[, clicker_app_Next := shift(click_time, 1, type = "lead", fill = 0) - click_time, 
-#    by = .(ip, device, os, app)]
-#adte[, clicker_ch_Next := shift(click_time, 1, type = "lead", fill = 0) - click_time, 
-#    by = .(ip, device, os, app, channel)]
-#adte$clicker_Next <- ifelse(adte$clicker_Next < 0 , 0 , adte$clicker_Next)
-#adte$clicker_app_Next <- ifelse(adte$clicker_app_Next <0 , 0 , adte$clicker_app_Next)
-#adte$clicker_ch_Next <- ifelse(adte$clicker_ch_Next <0 , 0 , adte$clicker_ch_Next)
-dim(adte)
-colnames(adte)
-#adte$h_div <- ifelse(adte$click_hour %in% te_hourG1, 1, 
-#                    ifelse(adte$click_hour %in% te_hourG2, 3, 2))
-colnames(adte)
-adte <- adte[, -c("click_id", "ip", "click_time")]
-colnames(adte)
-adte <- as.matrix(adte)
-realpred <- predict(model_lgbm, adte, n = model_lgbm$best_iter)
-sub <- fread("../input/sample_submission.csv")
-sub$is_attributed <- round(realpred, 6)
-fwrite(sub, paste0("AdT_NPC_", round(model_lgbm$best_score, 6), ".csv"))
-
-
-##### END #####
