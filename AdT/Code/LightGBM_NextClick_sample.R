@@ -77,10 +77,10 @@ dval <- lgb.Dataset(data = as.matrix(adtr[adt_index,][-tri,]),
                     categorical_feature = cat_f)
 dtest <- as.matrix(adtr[-adt_index,])
 params = list(objective = "binary", 
-              metric = "auc", 
+              metric = "auc",
               learning_rate= 0.1, 
               num_leaves= 7,
-              max_depth= 4,
+              max_depth= 3,
               min_child_samples= 100,
               max_bin= 100,
               subsample= 0.7,
@@ -90,7 +90,7 @@ params = list(objective = "binary",
               min_split_gain= 0,
               scale_pos_weight=99.7)
 model_lgbm <- lgb.train(params, dtrain, valids = list(validation = dval), 
-                        nthread = 8, nrounds = 3000, verbose = 1, 
+                        nthread = 8, nrounds = 3000, verbose = 1, boosting = "gbdt",
                         early_stopping_rounds = 300, eval_freq = 10)
 #str(model_lgbm)
 #model_lgbm$record_evals

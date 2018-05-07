@@ -123,8 +123,8 @@ params = list(objective = "binary",
               scale_pos_weight=99.7 #change : 99.7 to 200
 )
 model_lgbm <- lgb.train(params, dtrain, valids = list(validation = dval), 
-                        nthread = 8, nrounds = 1000, verbose = 1, 
-                        early_stopping_rounds = 100, eval_freq = 10)
+                        nthread = 8, nrounds = 1200, verbose = 1, boosting = "gbdt",
+                        early_stopping_rounds = 120, eval_freq = 10)
 model_lgbm$best_score
 model_lgbm$best_iter
 
