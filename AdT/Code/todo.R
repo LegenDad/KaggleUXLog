@@ -80,7 +80,7 @@ adt[is.na(clicker_ch_prev), clicker_ch_prev := 0]
 library(caret)
 set.seed(777)
 y <- adt[tri]$is_attributed
-idx <- createDataPartition(y, p= 0.9, list = F)
+idx <- createDataPartition(y, p= 0.95, list = F)
 #adt_index <- createDataPartition(y, p = 0.7, list = F)
 #tri <- createDataPartition(y[adt_index], p = 0.9, list = F)
 cat_f <- c("app", "device", "os", "channel", "click_hour")
@@ -105,11 +105,13 @@ dtrain <- lgb.Dataset(data = as.matrix(adtr[tri][idx,]),
 dval <- lgb.Dataset(data = as.matrix(adtr[tri][-idx,]), 
                     label = y[-idx], 
                     categorical_feature = cat_f)
-rm(adtr); gc()
+saveRDS(adte, "adte.RDS")
+rm(adtr, adte); gc()
 mem_used()
 
 params = list(objective = "binary", 
               metric = "auc", 
+              boosting = "gbdt",
               learning_rate= 0.1, 
               num_leaves= 7,
               max_depth= 3,  #change:4 to 3
@@ -119,11 +121,12 @@ params = list(objective = "binary",
               subsample_freq= 1,
               colsample_bytree= 0.7, #change : 0.7 to 0.9
               min_child_weight= 0,
-              min_split_gain= 0,
+              min_split_gain= 0, 
               scale_pos_weight=99.7 #change : 99.7 to 200
-)
+              )
+
 model_lgbm <- lgb.train(params, dtrain, valids = list(validation = dval), 
-                        nthread = 8, nrounds = 1200, verbose = 1, boosting = "gbdt",
+                        nthread = 8, nrounds = 1200, verbose = 1,
                         early_stopping_rounds = 120, eval_freq = 10)
 model_lgbm$best_score
 model_lgbm$best_iter
@@ -146,7 +149,7 @@ mem_used()
 #rm(adt_index, dtest, dval, dtrain, adtr, tri, y); gc()
 rm(dval, dtrain, idx, y); gc()
 mem_used()
-
+adte <- readRDS("adte.RDS")
 realpred <- predict(model_lgbm, adte, n = model_lgbm$best_iter)
 sub <- fread("../input/sample_submission.csv")
 sub$is_attributed <- round(realpred, 6)
