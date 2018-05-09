@@ -8,7 +8,7 @@ tr <- fread("../input/train.csv")
 set.seed(777)
 #tr <- tr[sample(.N, 50e6), ]
 #tr <- tr[sample(.N, 30e6), ]
-tr <- tr[sample(.N, 10e6), ]
+#tr <- tr[sample(.N, 10e6), ]
 #adt <- adt[sample(.N, 30e6), ]
 te <- fread("../input/test.csv")
 
@@ -82,13 +82,29 @@ adt[, clicker_app_Nmean := as.integer(mean(clicker_app_Next)),
     by = .(ip, device, os,app)]
 adt[, clicker_ch_Nmean := as.integer(mean(clicker_ch_Next)), 
     by = .(ip, device, os, app, channel)]
-head(adt)
+adt[, clicker_Pmean := as.integer(mean(clicker_prev)), by = .(ip, device, os)]
+adt[, clicker_app_Pmean := as.integer(mean(clicker_app_prev)), 
+    by = .(ip, device, os,app)]
+adt[, clicker_ch_Pmean := as.integer(mean(clicker_ch_prev)), 
+    by = .(ip, device, os, app, channel)]
+
+adt[, clicker_Nmean := as.integer(median(clicker_Next)), by = .(ip, device, os)]
+adt[, clicker_app_Nmean := as.integer(median(clicker_app_Next)), 
+    by = .(ip, device, os,app)]
+adt[, clicker_ch_Nmean := as.integer(median(clicker_ch_Next)), 
+    by = .(ip, device, os, app, channel)]
+adt[, clicker_Pmean := as.integer(median(clicker_prev)), by = .(ip, device, os)]
+adt[, clicker_app_Pmean := as.integer(median(clicker_app_prev)), 
+    by = .(ip, device, os,app)]
+adt[, clicker_ch_Pmean := as.integer(median(clicker_ch_prev)), 
+    by = .(ip, device, os, app, channel)]
+colnames(adt)
 
 
 library(caret)
 set.seed(777)
 y <- adt[tri]$is_attributed
-idx <- createDataPartition(y, p= 0.95, list = F)
+idx <- createDataPartition(y, p= 0.85, list = F)
 #adt_index <- createDataPartition(y, p = 0.7, list = F)
 #tri <- createDataPartition(y[adt_index], p = 0.9, list = F)
 cat_f <- c("app", "device", "os", "channel", "click_hour")
