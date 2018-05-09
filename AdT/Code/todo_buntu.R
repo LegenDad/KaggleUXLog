@@ -130,7 +130,7 @@ library(caret)
 library(pryr)
 library(lightgbm)
 
-adte <- readRDS("adte.RDS")
+#adte <- readRDS("adte.RDS")
 adtr <- readRDS("adtr.RDS")
 cat_f <- readRDS("cat_f.RDS")
 idx <- readRDS("idx.RDS")
