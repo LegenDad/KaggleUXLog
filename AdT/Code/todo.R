@@ -7,7 +7,8 @@ tr <- fread("../input/train.csv")
 #Select Train Sizes
 set.seed(777)
 #tr <- tr[sample(.N, 50e6), ]
-#tr <- tr[sample(.N, 50e6), ]
+#tr <- tr[sample(.N, 30e6), ]
+tr <- tr[sample(.N, 10e6), ]
 #adt <- adt[sample(.N, 30e6), ]
 te <- fread("../input/test.csv")
 
@@ -76,6 +77,13 @@ adt[is.na(clicker_ch_prev), clicker_ch_prev := 0]
 #adt$clicker_Next <- ifelse(adt$clicker_Next < 0 , 0 , adt$clicker_Next)
 #adt$clicker_app_Next <- ifelse(adt$clicker_app_Next <0 , 0 , adt$clicker_app_Next)
 #adt$clicker_ch_Next <- ifelse(adt$clicker_ch_Next <0 , 0 , adt$clicker_ch_Next)
+adt[, clicker_Nmean := as.integer(mean(clicker_Next)), by = .(ip, device, os)]
+adt[, clicker_app_Nmean := as.integer(mean(clicker_app_Next)), 
+    by = .(ip, device, os,app)]
+adt[, clicker_ch_Nmean := as.integer(mean(clicker_ch_Next)), 
+    by = .(ip, device, os, app, channel)]
+head(adt)
+
 
 library(caret)
 set.seed(777)
