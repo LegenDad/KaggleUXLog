@@ -88,15 +88,15 @@ adt[, clicker_app_Pmean := as.integer(mean(clicker_app_prev)),
 adt[, clicker_ch_Pmean := as.integer(mean(clicker_ch_prev)), 
     by = .(ip, device, os, app, channel)]
 
-adt[, clicker_Nmean := as.integer(median(clicker_Next)), by = .(ip, device, os)]
-adt[, clicker_app_Nmean := as.integer(median(clicker_app_Next)), 
+adt[, clicker_Nmed := as.integer(median(clicker_Next)), by = .(ip, device, os)]
+adt[, clicker_app_Nmed := as.integer(median(clicker_app_Next)), 
     by = .(ip, device, os,app)]
-adt[, clicker_ch_Nmean := as.integer(median(clicker_ch_Next)), 
+adt[, clicker_ch_Nmed := as.integer(median(clicker_ch_Next)), 
     by = .(ip, device, os, app, channel)]
-adt[, clicker_Pmean := as.integer(median(clicker_prev)), by = .(ip, device, os)]
-adt[, clicker_app_Pmean := as.integer(median(clicker_app_prev)), 
+adt[, clicker_Pmed := as.integer(median(clicker_prev)), by = .(ip, device, os)]
+adt[, clicker_app_Pmed := as.integer(median(clicker_app_prev)), 
     by = .(ip, device, os,app)]
-adt[, clicker_ch_Pmean := as.integer(median(clicker_ch_prev)), 
+adt[, clicker_ch_Pmed := as.integer(median(clicker_ch_prev)), 
     by = .(ip, device, os, app, channel)]
 colnames(adt)
 
