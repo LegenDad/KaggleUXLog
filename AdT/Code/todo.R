@@ -15,13 +15,13 @@ te <- fread("../input/test.csv")
 tr <- tr[, -"attributed_time"]
 te <- te[, -"click_id"]
 
+tr <- setorder(tr, click_time)
 tri <- 1:nrow(tr)
 
 adt <- rbind(tr, te, fill = T)
 rm(tr, te); gc()
 
 library(lubridate)
-adt <- setorder(adt, click_time)
 adt[, click_hour := hour(adt$click_time)]
 adt[, click_weekd := wday(adt$click_time)]
 adt$click_time <- as.numeric(ymd_hms(adt$click_time))
