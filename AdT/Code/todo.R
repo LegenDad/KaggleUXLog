@@ -5,12 +5,12 @@ library(data.table)
 #                           "click_time", "attributed_time", "is_attributed"))
 tr <- fread("../input/train.csv")
 #Select Train Sizes
-set.seed(777)
+#set.seed(777)
 #tr <- tr[sample(.N, 50e6), ]
 #tr <- tr[sample(.N, 30e6), ]
 #tr <- tr[sample(.N, 10e6), ]
 #adt <- adt[sample(.N, 30e6), ]
-te <- fread("../input/test.csv")
+te <- fread("../input/test_supplement.csv")
 
 tr <- tr[, -"attributed_time"]
 te <- te[, -"click_id"]
@@ -175,7 +175,8 @@ rm(dval, dtrain, idx, y); gc()
 mem_used()
 adte <- readRDS("adte.RDS")
 realpred <- predict(model_lgbm, adte, n = model_lgbm$best_iter)
-sub <- fread("../input/sample_submission.csv")
-sub$is_attributed <- round(realpred, 6)
-fwrite(sub, paste0("AdT_T_NPC_", round(model_lgbm$best_score, 6), ".csv"))
+saveRDS(realpred, "realpred.RDS")
+#sub <- fread("../input/sample_submission.csv")
+#sub$is_attributed <- round(realpred, 6)
+#fwrite(sub, paste0("AdT_T_NPC_", round(model_lgbm$best_score, 6), ".csv"))
 
