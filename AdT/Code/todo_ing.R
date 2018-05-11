@@ -1,75 +1,14 @@
 rm(list=ls()); gc()
 library(data.table)
-tr <- fread("../input/train.csv")
-#Select Train Sizes
-#set.seed(777)
-#tr <- tr[sample(.N, 50e6), ]
-#test dataset change
-te <- fread("../input/test_supplement.csv")
-
-tr <- tr[, -"attributed_time"]
-te <- te[, -"click_id"]
-
-tr <- setorder(tr, click_time)
-tri <- 1:nrow(tr)
-adt <- rbind(tr, te, fill = T)
-rm(tr, te); gc()
-
-##### 1st Saving Poin #####
-saveRDS(adt, "adt_1st.RDS")
-saveRDS(tri, "tri_1st.RDS")
-
 library(lubridate)
-adt[, click_hour := hour(adt$click_time)]
-adt[, click_weekd := wday(adt$click_time)]
-adt$click_time <- as.numeric(ymd_hms(adt$click_time))
-head(adt)
-adt[, ip_hw := .N, by = list(ip, click_hour, click_weekd)]
-adt[, ip_app := .N, by = list(ip, app)]
-adt[, ip_dev := .N, by = list(ip, device)]
-adt[, ip_os := .N, by = list(ip, os)]
-adt[, ip_ch := .N, by = list(ip, channel)]
-adt[, ip_cnt := .N, by = ip]
-adt[, app_cnt := .N, by = app]
-adt[, dev_cnt := .N, by = device]
-adt[, os_cnt := .N, by = os]
-adt[, ch_cnt := .N, by = channel]
-adt[, clicker := .N, by = list(ip, device, os)]
-adt[, clicker_app := .N, by = list(ip, device, os, app)]
-adt[, clicker_N := seq(.N), by = list(ip, device, os)]
-adt[, clicker_app_N := seq(.N), by = list(ip, device, os, app)]
-adt[, app_dev := .N, by = list(app, device)]
-adt[, app_os := .N, by = list(app, os)]
-adt[, app_ch := .N, by = list(app, channel)]
-dim(adt)
-colnames(adt)
-#te_hourG1 <- c(4, 14, 13, 10, 9, 5)
-#te_hourG2 <- c(15, 11, 6)
-#adt$h_div <- ifelse(adt$click_hour %in% te_hourG1, 1, 
-#                    ifelse(adt$click_hour %in% te_hourG2, 3, 2))
-colnames(adt)
-adt[, clicker_Next := c(click_time[-1], NA), by = .(ip, device, os)]
-adt[, clicker_Next := clicker_Next - click_time, by = .(ip, device, os)]
-adt[is.na(clicker_Next), clicker_Next := 0]
-adt[, clicker_app_Next := c(click_time[-1], NA), by = .(ip, device, os, app)]
-adt[, clicker_app_Next := clicker_app_Next - click_time, by = .(ip, device, os, app)]
-adt[is.na(clicker_app_Next), clicker_app_Next := 0]
-adt[, clicker_ch_Next := c(click_time[-1], NA), by = .(ip, device, os, app, channel)]
-adt[, clicker_ch_Next := clicker_ch_Next - click_time, 
-    by = .(ip, device, os,app,channel)]
-adt[is.na(clicker_ch_Next), clicker_ch_Next := 0]
-adt[, clicker_prev := click_time - shift(click_time), by = .(ip, device, os)]
-adt[is.na(clicker_prev), clicker_prev := 0]
-adt[, clicker_app_prev := click_time - shift(click_time), by = .(ip, device, os, app)]
-adt[is.na(clicker_app_prev), clicker_app_prev := 0]
-adt[, clicker_ch_prev := click_time - shift(click_time), 
-    by = .(ip, device, os, app, channel)]
-adt[is.na(clicker_ch_prev), clicker_ch_prev := 0]
-
+##### 1st Saving Poin #####
+#saveRDS(adt, "adt_1st.RDS")
+#saveRDS(tri, "tri_1st.RDS")
 ##### 2nd Saving Point #####
-saveRDS(adt, "adt_2nd.RDS")
-
-
+#saveRDS(adt, "adt_2nd.RDS")
+adt <- readRDS("adt_2nd.RDS")
+tri <- readRDS("tri_1st.RDS")
+colnames(adt)
 #adt[, clicker_Next := shift(click_time, 1, type = "lead", fill = 0) - click_time, 
 #    by = .(ip, device, os)]
 #adt[, clicker_app_Next := shift(click_time, 1, type = "lead", fill = 0) - click_time, 
@@ -147,7 +86,7 @@ params = list(objective = "binary",
               min_child_weight= 0,
               min_split_gain= 0, 
               scale_pos_weight=99.7 #change : 99.7 to 200
-              )
+)
 
 model_lgbm <- lgb.train(params, dtrain, valids = list(validation = dval), 
                         nthread = 8, nrounds = 1200, verbose = 1,
