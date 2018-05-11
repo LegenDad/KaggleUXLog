@@ -1,15 +1,10 @@
 rm(list=ls()); gc()
 library(data.table)
-#adt <- fread("../input/train.csv", skip = 134903891, 
-#             col.names = c("ip", "app", "device", "os", "channel", 
-#                           "click_time", "attributed_time", "is_attributed"))
 tr <- fread("../input/train.csv")
 #Select Train Sizes
 #set.seed(777)
 #tr <- tr[sample(.N, 50e6), ]
-#tr <- tr[sample(.N, 30e6), ]
-#tr <- tr[sample(.N, 10e6), ]
-#adt <- adt[sample(.N, 30e6), ]
+#test dataset change
 te <- fread("../input/test_supplement.csv")
 
 tr <- tr[, -"attributed_time"]
@@ -17,9 +12,12 @@ te <- te[, -"click_id"]
 
 tr <- setorder(tr, click_time)
 tri <- 1:nrow(tr)
-
 adt <- rbind(tr, te, fill = T)
 rm(tr, te); gc()
+
+##### 1st Saving Poin #####
+saveRDS(adt, "adt_1st.RDS")
+saveRDS(tri, "tri_1st.RDS")
 
 library(lubridate)
 adt[, click_hour := hour(adt$click_time)]
@@ -68,6 +66,10 @@ adt[, clicker_ch_prev := click_time - shift(click_time),
     by = .(ip, device, os, app, channel)]
 adt[is.na(clicker_ch_prev), clicker_ch_prev := 0]
 
+##### 2nd Saving Point #####
+saveRDS(adt, "adt_2nd.RDS")
+
+
 #adt[, clicker_Next := shift(click_time, 1, type = "lead", fill = 0) - click_time, 
 #    by = .(ip, device, os)]
 #adt[, clicker_app_Next := shift(click_time, 1, type = "lead", fill = 0) - click_time, 
@@ -100,6 +102,8 @@ adt[, clicker_ch_Pmed := as.integer(median(clicker_ch_prev)),
     by = .(ip, device, os, app, channel)]
 colnames(adt)
 
+##### 3rd Saving Point #####
+saveRDS(adt, "adt_3rd.RDS")
 
 library(caret)
 set.seed(777)
