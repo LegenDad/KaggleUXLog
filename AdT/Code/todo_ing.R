@@ -1,13 +1,13 @@
 rm(list=ls()); gc()
 library(data.table)
 library(lubridate)
-##### 1st Saving Poin #####
+##### 1st Saving Point #####
 #saveRDS(adt, "adt_1st.RDS")
 #saveRDS(tri, "tri_1st.RDS")
 ##### 2nd Saving Point #####
 #saveRDS(adt, "adt_2nd.RDS")
 adt <- readRDS("adt_2nd.RDS")
-tri <- readRDS("tri_1st.RDS")
+
 colnames(adt)
 #adt[, clicker_Next := shift(click_time, 1, type = "lead", fill = 0) - click_time, 
 #    by = .(ip, device, os)]
@@ -29,6 +29,9 @@ adt[, clicker_app_Pmean := as.integer(mean(clicker_app_prev)),
 adt[, clicker_ch_Pmean := as.integer(mean(clicker_ch_prev)), 
     by = .(ip, device, os, app, channel)]
 
+##### 3rd Saving Point #####
+saveRDS(adt, "adt_3rd.RDS")
+
 adt[, clicker_Nmed := median(clicker_Next), by = .(ip, device, os)]
 adt[, clicker_app_Nmed := median(clicker_app_Next), by = .(ip, device, os,app)]
 adt[, clicker_ch_Nmed := median(clicker_ch_Next), by = .(ip, device, os, app, channel)]
@@ -37,9 +40,10 @@ adt[, clicker_app_Pmed := median(clicker_app_prev), by = .(ip, device, os,app)]
 adt[, clicker_ch_Pmed := median(clicker_ch_prev), by = .(ip, device, os, app, channel)]
 colnames(adt)
 
-##### 3rd Saving Point #####
-saveRDS(adt, "adt_3rd.RDS")
+##### 4th Saving Point #####
+saveRDS(adt, "adt_4th.RDS")
 
+tri <- readRDS("tri_1st.RDS")
 library(caret)
 set.seed(777)
 y <- adt[tri]$is_attributed
