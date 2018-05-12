@@ -6,18 +6,21 @@ tr <- fread("../input/train.csv")
 #tr <- tr[sample(.N, 50e6), ]
 #test dataset change
 te <- fread("../input/test_supplement.csv")
-
+tr <- setorder(tr, click_time, is_attributed)
 tr <- tr[, -"attributed_time"]
+tri <- 1:nrow(tr)
+te <- setorder(te, click_time, click_id)
+te <- te[634:nrow(te)]   #tr-te gap
+teid <- te$click_id
 te <- te[, -"click_id"]
 
-tr <- setorder(tr, click_time)
-tri <- 1:nrow(tr)
 adt <- rbind(tr, te, fill = T)
 rm(tr, te); gc()
 
 ##### 1st Saving Poin #####
 saveRDS(adt, "adt_1st.RDS")
 saveRDS(tri, "tri_1st.RDS")
+saveRDS(teid, "teid.RDS")
 
 library(lubridate)
 adt[, click_hour := hour(adt$click_time)]
@@ -179,4 +182,26 @@ saveRDS(realpred, "realpred.RDS")
 #sub <- fread("../input/sample_submission.csv")
 #sub$is_attributed <- round(realpred, 6)
 #fwrite(sub, paste0("AdT_T_NPC_", round(model_lgbm$best_score, 6), ".csv"))
+#realpred <- readRDS("realpred.RDS")
+length(realpred)
+#tes <- fread("../input/test_supplement.csv", select = "click_id")
+#tes$pred <- realpred
+#range(tes$click_id)
+tes <- data.table(click_id = 0:(length(realpred)-1), realpred = realpred)
 
+cir <- fread("../input/test_click_id_relation.csv")
+head(cir)
+#tes[click_id == 21290878]
+#tes[click_id == 21290876]
+#tes[click_id == 21290880]
+#tes[click_id == 21290882]
+#tes[click_id %in% c(21290878, 21290876, 21290880, 21290882)]
+cir <- setorder(cir, click_id.testsup)
+cir[, pred := tes$realpred[tes$click_id %in% cir$click_id.testsup]]
+#cir[click_id.testsup %in% c(21290878, 21290876, 21290880, 21290882)]
+cir <- setorder(cir, click_id.test)
+
+sub <- fread("../input/sample_submission.csv")
+sub$is_attributed <- round(cir$pred, 6)
+head(sub)
+fwrite(sub, paste0("AdT_T_TS_", round(model_lgbm$best_score, 6), ".csv"))
