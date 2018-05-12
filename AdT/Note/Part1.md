@@ -64,7 +64,7 @@ model <- train(factor(is_attributed)~., adtr, method = "glm",
 train sample  훈련에서도 메모리 부족을 경험하게 한 모델  
 ![](../output/rf.memory52G.png)  
 
-* XGB : [Code](https://github.com/LegenDad/KaggleUXLog/blob/master/AdT/Code/XGBoost_sample.R)
+* XGB : [Code](https://github.com/LegenDad/KaggleUXLog/blob/master/AdT/Code/XGBoost_sample.R)  
 상위권 LB 욕심을 자극주는 모델이었다.  
 위 모델들 보다 적은 메모리, 빠른 실행 시간을 보장해주는 알고리즘  
 개인적으로 모델 활용을 위한 훈련, 검증, 테스트 셋에 대한 활용에 많은 도움을 준 모델  
@@ -89,3 +89,20 @@ datatable 패키지에 활용하는 면에서도 많은 도움이 되었다.
 
 
 ### R Package : dplyr vs datatable  
+두 패키지 모두 정말 훌륭하다.  
+하지만 이번 데이터 활용에서 느낀 경험은 두 패키지는 활용 용도가 다르다.
+* dplyr
+가독성이 좋다. 코드를 보면 바로 이해할 수 있는 느낌을 준다.  
+하지만 데이터가 커지면 연산 속도가 현저하게 느려진다.  
+* datatable  
+dplyr에 비하면 가독성이 떨어진다.  
+익숙치 않은 상태에서 보면 외계어가 보이는 느낌이 있다.  
+하지만 dplyr로 비슷하게 구현하고 보면 적응이 금방 된다.  
+
+두 패키지 모두 경험 후, 실제 연산 속도를 비교해 봤다.  
+같은 결과값을 주는 단일 코드 값 비교  
+![](../output/dplyr.vs.datatable.png)  
+여러 파생 변수 생성에 있ㅇ서 비교  
+![](../output/dplyr.vs.datatable.2.JPG)
+속도는 2배 이상 차이가 나는 듯 하다.  
+사용한 코드는 [dplyr](/AdT/Code/test_dplyr.R), [datatable](/AdT/Code/test_datatable.R)
