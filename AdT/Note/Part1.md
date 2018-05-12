@@ -44,7 +44,8 @@ Fraud라는 용어 자체의 불편한 경험이 있지만,
 
 ---
 
-* GLM : [Code](https://github.com/LegenDad/KaggleUXLog/blob/master/AdT/Code/Glm_Tree_Sample.R)
+* GLM : [Code](https://github.com/LegenDad/KaggleUXLog/blob/master/AdT/Code/Glm_Tree_Sample.R)  
+
 XGB, LGBM의 결과가 너무 우수해서 개선의 필요성을 느끼지 못했다
 사용해보고 교차 분석 활용 경험 용도였다.  
 
@@ -85,3 +86,6 @@ target for train, target fot valid
 모두 접근 할 수 있다.   
 또한 이렇게 습득한 key값에 대한 경험은  
 datatable 패키지에 활용하는 면에서도 많은 도움이 되었다.  
+
+
+### R Package : dplyr vs datatable  
