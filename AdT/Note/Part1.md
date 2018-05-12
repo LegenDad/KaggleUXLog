@@ -102,7 +102,7 @@ dplyr에 비하면 가독성이 떨어진다.
 두 패키지 모두 경험 후, 실제 연산 속도를 비교해 봤다.  
 같은 결과값을 주는 단일 코드 값 비교  
 ![](../output/dplyr.vs.datatable.png)  
-여러 파생 변수 생성에 있ㅇ서 비교  
-![](../output/dplyr.vs.datatable.2.JPG)
+여러 파생 변수 생성에 있어서 비교  
+![](../output/dplyr.vs.datatable.2.JPG)  
 속도는 2배 이상 차이가 나는 듯 하다.  
-사용한 코드는 [dplyr](/AdT/Code/test_dplyr.R), [datatable](/AdT/Code/test_datatable.R)
+사용한 코드는 [dplyr](/KaggleUXLog//AdT/Code/test_dplyr.R), [datatable](/KaggleUXLog//AdT/Code/test_datatable.R)
