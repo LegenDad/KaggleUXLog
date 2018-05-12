@@ -19,7 +19,7 @@ Fraud라는 용어 자체의 불편한 경험이 있지만,
 
 
 
-<br>
+---
 ### 파생 변수 생성에 대한 접근  
 
 익숙치 않은 시각화을 통한 인사이트 도출 보다는 모델링을 해서 나온 결과를 통해  
@@ -34,7 +34,7 @@ Fraud라는 용어 자체의 불편한 경험이 있지만,
 
 
 
-<br>  
+---
 ### 여러 알고리즘 별 결과 비교  
 
 |  <center>Model</center> |  <center>Size</center> |  <center>Valid AUC</center> | <center>LB Score </center> |
@@ -70,23 +70,24 @@ model <- train(factor(is_attributed)~., adtr, method = "glm",
 훈련은 잘되는 듯 했으나, 최종 스코어 점수가 많이 떨어진 경우  
 과적합 해결을 위해 파라미터 수정이 필요했으나,   
 마찬가지로 XGB, LGBM 결과와 너무 비교되서 배제했다.  
-<br>
+
+
 * RandomForest : [Code](https://github.com/LegenDad/KaggleUXLog/blob/master/AdT/Code/RandomForest_server.R)  
 train sample  훈련에서도 메모리 부족을 경험하게 한 모델  
 ![](../output/rf.memory52G.png)  
-<br>
+
 * XGB : [Code](https://github.com/LegenDad/KaggleUXLog/blob/master/AdT/Code/XGBoost_sample.R)  
 상위권 LB 욕심을 자극주는 모델이었다.  
 위 모델들 보다 적은 메모리, 빠른 실행 시간을 보장해주는 알고리즘  
 개인적으로 모델 활용을 위한 훈련, 검증, 테스트 셋에 대한 활용에 많은 도움을 준 모델  
-<br>
+
 * LGBM : [Code](https://github.com/LegenDad/KaggleUXLog/blob/master/AdT/Code/LightGBM_sample.R)  
 최종 적용 모델  
 Categorical Features 활용으로 XGB 대비 Score 향상이 확실히 된 모델  
 XGB 대비 훈련 속도도 빠르다.  
 자세한 개선 방향은 Part2에서 적을 예정이다.  
 
-<br>
+---
 ### 모델 생성을 위한 훈련, 검증, 테스트 데이터 구상표   
 ![](../output/trtetable.png)  
 
@@ -99,7 +100,7 @@ target for train, target fot valid
 또한 이렇게 습득한 key값에 대한 경험은  
 datatable 패키지에 활용하는 면에서도 많은 도움이 되었다.  
 
-<br>
+  ---
 ### R Package : dplyr vs datatable  <br>
 두 패키지 모두 정말 훌륭하다.  
 하지만 이번 데이터 활용에서 느낀 경험은 두 패키지는 활용 용도가 다르다.
