@@ -84,7 +84,8 @@ train sample  훈련에서도 메모리 부족을 경험하게 한 모델
 최종 적용 모델  
 Categorical Features 활용으로 XGB 대비 Score 향상이 확실히 된 모델  
 XGB 대비 훈련 속도도 빠르다.  
-자세한 개선 방향은 Part2에서 적을 예정이다.
+자세한 개선 방향은 Part2에서 적을 예정이다.  
+
 <br>
 ### 모델 생성을 위한 훈련, 검증, 테스트 데이터 구상표   
 ![](../output/trtetable.png)  
@@ -99,7 +100,7 @@ target for train, target fot valid
 datatable 패키지에 활용하는 면에서도 많은 도움이 되었다.  
 
 <br>
-### R Package : dplyr vs datatable  
+### R Package : dplyr vs datatable  <br>
 두 패키지 모두 정말 훌륭하다.  
 하지만 이번 데이터 활용에서 느낀 경험은 두 패키지는 활용 용도가 다르다.
 * dplyr
