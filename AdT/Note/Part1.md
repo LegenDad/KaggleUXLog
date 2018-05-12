@@ -105,4 +105,4 @@ dplyr에 비하면 가독성이 떨어진다.
 여러 파생 변수 생성에 있어서 비교  
 ![](../output/dplyr.vs.datatable.2.JPG)  
 속도는 2배 이상 차이가 나는 듯 하다.  
-사용한 코드는 [dplyr](/KaggleUXLog//AdT/Code/test_dplyr.R), [datatable](/KaggleUXLog//AdT/Code/test_datatable.R)
+사용한 코드는 [dplyr](https://github.com/LegenDad/KaggleUXLog/blob/master/AdT/Code/test_dplyr.R), [datatable](https://github.com/LegenDad/KaggleUXLog/blob/master/AdT/Code/test_datatable.R)
