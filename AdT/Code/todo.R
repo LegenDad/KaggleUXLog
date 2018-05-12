@@ -17,7 +17,7 @@ te <- te[, -"click_id"]
 adt <- rbind(tr, te, fill = T)
 rm(tr, te); gc()
 
-##### 1st Saving Poin #####
+##### 1st Saving Point #####
 saveRDS(adt, "adt_1st.RDS")
 saveRDS(tri, "tri_1st.RDS")
 saveRDS(teid, "teid.RDS")
