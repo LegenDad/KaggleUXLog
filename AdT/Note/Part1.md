@@ -64,7 +64,7 @@ model <- train(factor(is_attributed)~., adtr, method = "glm",
 ```
 
 
-   <br>
+
 
 * Decision Tree : [Code](https://github.com/LegenDad/KaggleUXLog/blob/master/AdT/Code/Glm_Tree_Sample.R)  
 훈련은 잘되는 듯 했으나, 최종 스코어 점수가 많이 떨어진 경우  
@@ -104,7 +104,7 @@ datatable 패키지에 활용하는 면에서도 많은 도움이 되었다.
 ### R Package : dplyr vs datatable  <br>
 두 패키지 모두 정말 훌륭하다.  
 하지만 이번 데이터 활용에서 느낀 경험은 두 패키지는 활용 용도가 다르다.
-* dplyr
+* dplyr  
 가독성이 좋다. 코드를 보면 바로 이해할 수 있는 느낌을 준다.  
 하지만 데이터가 커지면 연산 속도가 현저하게 느려진다.  
 * datatable  
