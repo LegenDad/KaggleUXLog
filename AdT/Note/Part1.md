@@ -42,17 +42,46 @@ Fraud라는 용어 자체의 불편한 경험이 있지만,
 |**LGBM** | *2천만* |*0.92* | *0.93*|
 |**LGBM with  Categorical Features** | *1천만* |*0.92* | *0.96*|  
 
+---
+
 * GLM
 XGB, LGBM의 결과가 너무 우수해서 개선의 필요성을 느끼지 못했다
-사용해보고 교차 분석 활용 경험 용도였다.
-[code link](../Code/Glm_Tree_Sample.R)
+사용해보고 교차 분석 활용 경험 용도였다.  
+[Code link](../Code/Glm_Tree_Sample.R)
 ```r
 library(caret)
 model <- train(factor(is_attributed)~., adtr, method = "glm",
                trControl = trainControl(method = "cv", number = 10, verboseIter = TRUE))
 ```
 
-* Decision Tree  
+* Decision Tree : [Code](../Code/Glm_Tree_Sample.R)  
 훈련은 잘되는 듯 했으나, 최종 스코어 점수가 많이 떨어진 경우  
 과적합 해결을 위해 파라미터 수정이 필요했으나,   
-마찬가지로 XGB, LGBM 결과와 너무 비교되서 배제했다.
+마찬가지로 XGB, LGBM 결과와 너무 비교되서 배제했다.  
+
+* RandomForest : [Code](../Code/RandomForest_server.R)  
+train sample  훈련에서도 메모리 부족을 경험하게 한 모델  
+![](../output/rf.memory52G.png)  
+
+* XGB : [Code](../Code/XGBoost_sample.R)
+상위권 LB 욕심을 자극주는 모델이었다.  
+위 모델들 보다 적은 메모리, 빠른 실행 시간을 보장해주는 알고리즘  
+개인적으로 모델 활용을 위한 훈련, 검증, 테스트 셋에 대한 활용에 많은 도움을 준 모델  
+
+* LGBM : [Code](../Code/LightGBM_sample.R)  
+최종 적용 모델  
+Categorical Features 활용으로 XGB 대비 Score 향상이 확실히 된 모델  
+XGB 대비 훈련 속도도 빠르다.  
+자세한 개선 방향은 Part2에서 적을 예정이다.
+
+### 모델 생성을 위한 훈련, 검증, 테스트 데이터 구상표   
+![](../output/trtetable.png)  
+
+Train과 Test 구별을 위한 key 값 : tri vs -tri  
+Train과 Valid 구별을 위한 key 값 : train vs valid  
+위 2개의 key면  train+test Set에서  
+train, valid, test 그리고
+target for train, target fot valid   
+모두 접근 할 수 있다.   
+또한 이렇게 습득한 key값에 대한 경험은  
+datatable 패키지에 활용하는 면에서도 많은 도움이 되었다.  
