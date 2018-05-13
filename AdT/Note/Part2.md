@@ -34,7 +34,8 @@ Part3에서 언급하겠지만, 900개가 넘는 변수를 만든 상위권 유�
 |**LGBM with  Categorical Features** | *1천만* |*0.92* | *0.96*|
 |**LGBM with  NextClick** | *1천만* |*0.97* | *0.9715*|
 |**LGBM with  NextClick** | *5천만* |*0.97* | *0.9765*|
-|**LGBM with  NextClick** | *ALL* |*0.97* | *0.9735*|
+|**LGBM with  NextClick** | *ALL* |*0.97* | *0.9735*|  
+
 ---
 이렇게 성능 향상을 유도한 변수지만, 만들기가 쉽지 않았다.  
 python을 활용한 경우는 커널에 정보가 있었지만, R은 없어서 직접 만들어 보았는데...  
