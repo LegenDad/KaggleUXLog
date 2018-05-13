@@ -20,7 +20,7 @@ test에 적응해서 예측하기에는 해당 변수 값을 예측하는 모델
 이렇게 만든 모델의 성능이 좋지 못해서 최종 AUC 개선에는 실패한 경우  
 <br>
 
-* 무작위적으로 변수를 만들기  : [Code](https://github.com/LegenDad/KaggleUXLog/blob/master/AdT/Code/Fail/stupid_sample.R)
+* 무작위적으로 변수를 만들기  : [Code](https://github.com/LegenDad/KaggleUXLog/blob/master/AdT/Code/Fail/stupid_sample.R)  
 150개가 넘는 파생변수를 만들어서 적용해 보았지만,  
 AUC 향상은 전혀 이루어지지 않은 경우  
 위 Code 링크를 보면 만든 변수 확인이 가능하다.  
@@ -35,7 +35,7 @@ Part3에서 언급하겠지만, 900개가 넘는 변수를 만든 상위권 유�
 |**LGBM with  NextClick** | *1천만* |*0.97* | *0.9715*|
 |**LGBM with  NextClick** | *5천만* |*0.97* | *0.9765*|
 |**LGBM with  NextClick** | *ALL* |*0.97* | *0.9735*|
-
+---
 이렇게 성능 향상을 유도한 변수지만, 만들기가 쉽지 않았다.  
 python을 활용한 경우는 커널에 정보가 있었지만, R은 없어서 직접 만들어 보았는데...  
 train_sample 데이터로 해당 변수 생성하고 모델링까지의 과정이  
