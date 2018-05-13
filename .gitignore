@@ -11,4 +11,4 @@ AdT/Code/.RData
 *.RData
 AdT/Code/.ipynb_checkpoints/py_sample_test-checkpoint.ipynb
 AdT/SubM/
-AdT/Code/realpred.RDS
+AdT/Code/*.RDS
