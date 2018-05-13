@@ -184,24 +184,29 @@ saveRDS(realpred, "realpred.RDS")
 #fwrite(sub, paste0("AdT_T_NPC_", round(model_lgbm$best_score, 6), ".csv"))
 #realpred <- readRDS("realpred.RDS")
 length(realpred)
+
 #tes <- fread("../input/test_supplement.csv", select = "click_id")
 #tes$pred <- realpred
 #range(tes$click_id)
-tes <- data.table(click_id = 0:(length(realpred)-1), realpred = realpred)
-
+tes <- data.table(click_id = teid, realpred = realpred)
 cir <- fread("../input/test_click_id_relation.csv")
 head(cir)
-#tes[click_id == 21290878]
-#tes[click_id == 21290876]
-#tes[click_id == 21290880]
-#tes[click_id == 21290882]
-#tes[click_id %in% c(21290878, 21290876, 21290880, 21290882)]
-cir <- setorder(cir, click_id.testsup)
-cir[, pred := tes$realpred[tes$click_id %in% cir$click_id.testsup]]
+setkey(tes, click_id)
+setkey(cir, click_id.testsup)
+result <- tes[cir]
+head(result)
+#result <- setorder(result, click_id)
+#head(result)
+#tes[click_id %in% c(21290592, 21290658, 21290705, 21290785, 21290822, 21290876)]
+#tail(result)
+#tes[click_id %in% c(54584253:54584258)]
+result <- setorder(result, click_id.test)
+#cir <- setorder(cir, click_id.testsup)
+#cir[, pred := tes$realpred[tes$click_id %in% cir$click_id.testsup]]
 #cir[click_id.testsup %in% c(21290878, 21290876, 21290880, 21290882)]
-cir <- setorder(cir, click_id.test)
+#cir <- setorder(cir, click_id.test)
 
 sub <- fread("../input/sample_submission.csv")
-sub$is_attributed <- round(cir$pred, 6)
+sub$is_attributed <- round(result$realpred, 6)
 head(sub)
 fwrite(sub, paste0("AdT_T_TS_", round(model_lgbm$best_score, 6), ".csv"))
