@@ -96,7 +96,7 @@ adt[, clicker_ch_Last := max(click_time), by = .(ip, device, os, app, channel)]
 
 
 ##### 2nd Saving Point #####
-# saveRDS(adt, "adt_2nd.RDS")
+saveRDS(adt, "adt_2nd.RDS")
 
 
 #adt[, clicker_Next := shift(click_time, 1, type = "lead", fill = 0) - click_time, 
