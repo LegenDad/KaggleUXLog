@@ -113,7 +113,7 @@ train 변수들과의 흐름이 끊어지고 새로 만들어지게 된다.
 파생변수 만드는 과정 이전에 train, test를 하나로 병합해서 진행하면,  
 변수들의 흐름이 유지되고, 코드를 줄일 수 있게 된다.  
 
-[Code Here](../Code/LightGBM_NextPrev_Click_server.R)
+[Code Here](https://github.com/LegenDad/KaggleUXLog/blob/master/AdT/Code/LightGBM_NextPrev_Click_server.R)
 
 |  <center>Model</center> |  <center>Size</center> |  <center>Valid AUC</center> | <center>LB Score </center> |
 |:--------|:--------:|--------:|-------:|
