@@ -97,7 +97,7 @@ Next, Prev Click 변수의 흐름을 유지해준다.
 
 ### 14위 : [Link](https://zhuanlan.zhihu.com/p/36580283)
 
-* 중국어라서 어렵지만, CV와 NN 기법이 주요 포인트로 확
+* 중국어라서 어렵지만, CV와 NN 기법이 주요 포인트로 확인
 
 That's for the gold teams. More sharing from other teams below.
 
@@ -139,7 +139,7 @@ That's for the gold teams. More sharing from other teams below.
 
 * negative down-sampling
 1위 팀이 사용한 샘플링 방법  
-is_atrributed값 0,1을 동등한 숫자로 사용했음
+is_atrributed값 0,1을 1:1 비율로 추출  
 
 * test supplement 데이터 활용  
 matching 파일이 있지만, 내공 부족으로 auc 향상에는 실패
@@ -168,3 +168,17 @@ matching 파일이 있지만, 내공 부족으로 auc 향상에는 실패
 |**LGBM with  NP2_Last_Click** | *1천만* |*0.97* | *0.9720*|  
 
 Next, Prev 간격을 2까지 늘리고, `LastClick`를 추가하여 약간의 향상이 보여서 Size를 올려서 테스트 중이다.
+
+---
+
+Part1에서 소개된 이미지 및 동영상을 통해서  
+
+어뷰징 및 Fraud 유저의 조건을 특성 지을 수 있는 조건을 알 수 있다.
+
+이는 굳이 광고계의 `fraud click` 뿐 아니라
+
+게임업계에서는 `abusing user` 탐색 ,
+
+댓글 사이트에서는 `작업 계정` 탐색 등으로 활용할 수 있는
+
+feature로 비슷하게 모델링한다면 목적에 맞는 유저 탐색이 가능할 것이다.  
