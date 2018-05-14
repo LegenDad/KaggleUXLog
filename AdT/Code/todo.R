@@ -5,22 +5,23 @@ tr <- fread("../input/train.csv")
 #set.seed(777)
 #tr <- tr[sample(.N, 50e6), ]
 #test dataset change
-te <- fread("../input/test_supplement.csv")
+te <- fread("../input/test.csv")
+# te <- fread("../input/test_supplement.csv")
 tr <- setorder(tr, click_time, is_attributed)
 tr <- tr[, -"attributed_time"]
 tri <- 1:nrow(tr)
-te <- setorder(te, click_time, click_id)
-te <- te[634:nrow(te)]   #tr-te gap
-teid <- te$click_id
+# te <- setorder(te, click_time, click_id)
+# te <- te[634:nrow(te)]   #tr-te gap
+# teid <- te$click_id
 te <- te[, -"click_id"]
 
 adt <- rbind(tr, te, fill = T)
 rm(tr, te); gc()
 
 ##### 1st Saving Point #####
-saveRDS(adt, "adt_1st.RDS")
-saveRDS(tri, "tri_1st.RDS")
-saveRDS(teid, "teid.RDS")
+# saveRDS(adt, "adt_1st.RDS")
+# saveRDS(tri, "tri_1st.RDS")
+# saveRDS(teid, "teid.RDS")
 
 library(lubridate)
 adt[, click_hour := hour(adt$click_time)]
@@ -69,8 +70,32 @@ adt[, clicker_ch_prev := click_time - shift(click_time),
     by = .(ip, device, os, app, channel)]
 adt[is.na(clicker_ch_prev), clicker_ch_prev := 0]
 
+adt[, clicker_Next2 := shift(click_time, 2, type = "lead", fill = 0) - click_time, 
+    by = .(ip, device, os)]
+adt[clicker_Next2 < 0 , clicker_Next2 := 0]
+adt[, clicker_app_Next2 := shift(click_time, 2, type = "lead", fill = 0) - click_time,
+    by = .(ip, device, os, app)]
+adt[clicker_app_Next2 < 0 , clicker_app_Next2 := 0]
+adt[, clicker_ch_Next2 := shift(click_time, 2, type = "lead", fill = 0) - click_time,
+    by = .(ip, device, os, app, channel)]
+adt[clicker_ch_Next2 < 0 , clicker_ch_Next2 := 0]
+
+adt[, clicker_prev2 := click_time - shift(click_time, 2), by = .(ip, device, os)]
+adt[is.na(clicker_prev2), clicker_prev2 := 0]
+adt[, clicker_app_prev2 := click_time - shift(click_time, 2), by = 
+      .(ip, device, os, app)]
+adt[is.na(clicker_app_prev2), clicker_app_prev2 := 0]
+adt[, clicker_ch_prev2 := click_time - shift(click_time, 2), 
+    by = .(ip, device, os, app, channel)]
+adt[is.na(clicker_ch_prev2), clicker_ch_prev2 := 0]
+
+adt[, clicker_Last := max(click_time), by = .(ip, device, os)]
+adt[, clicker_app_Last := max(click_time), by = .(ip, device, os, app)]
+adt[, clicker_ch_Last := max(click_time), by = .(ip, device, os, app, channel)]
+
+
 ##### 2nd Saving Point #####
-saveRDS(adt, "adt_2nd.RDS")
+# saveRDS(adt, "adt_2nd.RDS")
 
 
 #adt[, clicker_Next := shift(click_time, 1, type = "lead", fill = 0) - click_time, 
@@ -82,32 +107,33 @@ saveRDS(adt, "adt_2nd.RDS")
 #adt$clicker_Next <- ifelse(adt$clicker_Next < 0 , 0 , adt$clicker_Next)
 #adt$clicker_app_Next <- ifelse(adt$clicker_app_Next <0 , 0 , adt$clicker_app_Next)
 #adt$clicker_ch_Next <- ifelse(adt$clicker_ch_Next <0 , 0 , adt$clicker_ch_Next)
-adt[, clicker_Nmean := as.integer(mean(clicker_Next)), by = .(ip, device, os)]
-adt[, clicker_app_Nmean := as.integer(mean(clicker_app_Next)), 
-    by = .(ip, device, os,app)]
-adt[, clicker_ch_Nmean := as.integer(mean(clicker_ch_Next)), 
-    by = .(ip, device, os, app, channel)]
-adt[, clicker_Pmean := as.integer(mean(clicker_prev)), by = .(ip, device, os)]
-adt[, clicker_app_Pmean := as.integer(mean(clicker_app_prev)), 
-    by = .(ip, device, os,app)]
-adt[, clicker_ch_Pmean := as.integer(mean(clicker_ch_prev)), 
-    by = .(ip, device, os, app, channel)]
 
-adt[, clicker_Nmed := median(clicker_Next), by = .(ip, device, os)]
-adt[, clicker_app_Nmed := median(clicker_app_Next), by = .(ip, device, os,app)]
-adt[, clicker_ch_Nmed := median(clicker_ch_Next), by = .(ip, device, os, app, channel)]
-adt[, clicker_Pmed := median(clicker_prev), by = .(ip, device, os)]
-adt[, clicker_app_Pmed := median(clicker_app_prev), by = .(ip, device, os,app)]
-adt[, clicker_ch_Pmed := median(clicker_ch_prev), by = .(ip, device, os, app, channel)]
+# adt[, clicker_Nmean := as.integer(mean(clicker_Next)), by = .(ip, device, os)]
+# adt[, clicker_app_Nmean := as.integer(mean(clicker_app_Next)), 
+#     by = .(ip, device, os,app)]
+# adt[, clicker_ch_Nmean := as.integer(mean(clicker_ch_Next)), 
+#     by = .(ip, device, os, app, channel)]
+# adt[, clicker_Pmean := as.integer(mean(clicker_prev)), by = .(ip, device, os)]
+# adt[, clicker_app_Pmean := as.integer(mean(clicker_app_prev)), 
+#     by = .(ip, device, os,app)]
+# adt[, clicker_ch_Pmean := as.integer(mean(clicker_ch_prev)), 
+#     by = .(ip, device, os, app, channel)]
+# 
+# adt[, clicker_Nmed := median(clicker_Next), by = .(ip, device, os)]
+# adt[, clicker_app_Nmed := median(clicker_app_Next), by = .(ip, device, os,app)]
+# adt[, clicker_ch_Nmed := median(clicker_ch_Next), by = .(ip, device, os, app, channel)]
+# adt[, clicker_Pmed := median(clicker_prev), by = .(ip, device, os)]
+# adt[, clicker_app_Pmed := median(clicker_app_prev), by = .(ip, device, os,app)]
+# adt[, clicker_ch_Pmed := median(clicker_ch_prev), by = .(ip, device, os, app, channel)]
 colnames(adt)
 
 ##### 3rd Saving Point #####
-saveRDS(adt, "adt_3rd.RDS")
+#saveRDS(adt, "adt_3rd.RDS")
 
 library(caret)
 set.seed(777)
 y <- adt[tri]$is_attributed
-idx <- createDataPartition(y, p= 0.85, list = F)
+idx <- createDataPartition(y, p= 0.9, list = F)
 #adt_index <- createDataPartition(y, p = 0.7, list = F)
 #tri <- createDataPartition(y[adt_index], p = 0.9, list = F)
 cat_f <- c("app", "device", "os", "channel", "click_hour")
@@ -126,6 +152,8 @@ library(lightgbm)
 #                    categorical_feature = cat_f)
 #dtest <- as.matrix(adtr[-adt_index,])
 adte <- as.matrix(adtr[-tri])
+saveRDS(adte, "adte.RDS")
+rm(adte); gc()
 dtrain <- lgb.Dataset(data = as.matrix(adtr[tri][idx,]), 
                       label = y[idx],
                       categorical_feature = cat_f)
@@ -133,7 +161,7 @@ dval <- lgb.Dataset(data = as.matrix(adtr[tri][-idx,]),
                     label = y[-idx], 
                     categorical_feature = cat_f)
 saveRDS(adte, "adte.RDS")
-rm(adtr, adte); gc()
+rm(adtr); gc()
 mem_used()
 
 params = list(objective = "binary", 
@@ -153,7 +181,7 @@ params = list(objective = "binary",
               )
 
 model_lgbm <- lgb.train(params, dtrain, valids = list(validation = dval), 
-                        nthread = 8, nrounds = 1200, verbose = 1,
+                        nthread = 8, nrounds = 1500, verbose = 1,
                         early_stopping_rounds = 120, eval_freq = 10)
 model_lgbm$best_score
 model_lgbm$best_iter
@@ -178,35 +206,35 @@ rm(dval, dtrain, idx, y); gc()
 mem_used()
 adte <- readRDS("adte.RDS")
 realpred <- predict(model_lgbm, adte, n = model_lgbm$best_iter)
-saveRDS(realpred, "realpred.RDS")
-#sub <- fread("../input/sample_submission.csv")
-#sub$is_attributed <- round(realpred, 6)
-#fwrite(sub, paste0("AdT_T_NPC_", round(model_lgbm$best_score, 6), ".csv"))
-#realpred <- readRDS("realpred.RDS")
-length(realpred)
-
-#tes <- fread("../input/test_supplement.csv", select = "click_id")
-#tes$pred <- realpred
-#range(tes$click_id)
-tes <- data.table(click_id = teid, realpred = realpred)
-cir <- fread("../input/test_click_id_relation.csv")
-head(cir)
-setkey(tes, click_id)
-setkey(cir, click_id.testsup)
-result <- tes[cir]
-head(result)
-#result <- setorder(result, click_id)
-#head(result)
-#tes[click_id %in% c(21290592, 21290658, 21290705, 21290785, 21290822, 21290876)]
-#tail(result)
-#tes[click_id %in% c(54584253:54584258)]
-result <- setorder(result, click_id.test)
-#cir <- setorder(cir, click_id.testsup)
-#cir[, pred := tes$realpred[tes$click_id %in% cir$click_id.testsup]]
-#cir[click_id.testsup %in% c(21290878, 21290876, 21290880, 21290882)]
-#cir <- setorder(cir, click_id.test)
-
+#saveRDS(realpred, "realpred.RDS")
 sub <- fread("../input/sample_submission.csv")
-sub$is_attributed <- round(result$realpred, 6)
-head(sub)
-fwrite(sub, paste0("AdT_T_TS_", round(model_lgbm$best_score, 6), ".csv"))
+sub$is_attributed <- round(realpred, 6)
+fwrite(sub, paste0("AdT_NP2Lst_NPC_", round(model_lgbm$best_score, 6), ".csv"))
+#realpred <- readRDS("realpred.RDS")
+# length(realpred)
+# 
+# #tes <- fread("../input/test_supplement.csv", select = "click_id")
+# #tes$pred <- realpred
+# #range(tes$click_id)
+# tes <- data.table(click_id = teid, realpred = realpred)
+# cir <- fread("../input/test_click_id_relation.csv")
+# head(cir)
+# setkey(tes, click_id)
+# setkey(cir, click_id.testsup)
+# result <- tes[cir]
+# head(result)
+# #result <- setorder(result, click_id)
+# #head(result)
+# #tes[click_id %in% c(21290592, 21290658, 21290705, 21290785, 21290822, 21290876)]
+# #tail(result)
+# #tes[click_id %in% c(54584253:54584258)]
+# result <- setorder(result, click_id.test)
+# #cir <- setorder(cir, click_id.testsup)
+# #cir[, pred := tes$realpred[tes$click_id %in% cir$click_id.testsup]]
+# #cir[click_id.testsup %in% c(21290878, 21290876, 21290880, 21290882)]
+# #cir <- setorder(cir, click_id.test)
+# 
+# sub <- fread("../input/sample_submission.csv")
+# sub$is_attributed <- round(result$realpred, 6)
+# head(sub)
+# fwrite(sub, paste0("AdT_T_TS_", round(model_lgbm$best_score, 6), ".csv"))
