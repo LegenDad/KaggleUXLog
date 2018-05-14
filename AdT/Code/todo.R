@@ -1,5 +1,7 @@
 rm(list=ls()); gc()
 library(data.table)
+library(lubridate)
+
 tr <- fread("../input/train.csv")
 #Select Train Sizes
 #set.seed(777)
@@ -18,12 +20,11 @@ te <- te[, -"click_id"]
 adt <- rbind(tr, te, fill = T)
 rm(tr, te); gc()
 
-##### 1st Saving Point #####
-# saveRDS(adt, "adt_1st.RDS")
-# saveRDS(tri, "tri_1st.RDS")
-# saveRDS(teid, "teid.RDS")
+#### 1st Saving Point #####
+saveRDS(adt, "adt_1st.RDS")
+saveRDS(tri, "tri_1st.RDS")
+#saveRDS(teid, "teid.RDS")
 
-library(lubridate)
 adt[, click_hour := hour(adt$click_time)]
 adt[, click_weekd := wday(adt$click_time)]
 adt$click_time <- as.numeric(ymd_hms(adt$click_time))
@@ -160,7 +161,6 @@ dtrain <- lgb.Dataset(data = as.matrix(adtr[tri][idx,]),
 dval <- lgb.Dataset(data = as.matrix(adtr[tri][-idx,]), 
                     label = y[-idx], 
                     categorical_feature = cat_f)
-saveRDS(adte, "adte.RDS")
 rm(adtr); gc()
 mem_used()
 
