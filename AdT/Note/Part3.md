@@ -57,25 +57,33 @@ Part2에 소개한 CPMP가 상위권 유저들의 브리핑을 엮어서 글을 
 ### 6위 : [Link](https://www.kaggle.com/c/talkingdata-adtracking-fraud-detection/discussion/56283)
 
 * test data 시간대를 valid로 활용
+
 <br>
 
 ### 8위 : [Link](https://www.kaggle.com/c/talkingdata-adtracking-fraud-detection/discussion/56325)
 
 * Statistics (mean/var)
 * 74 features
+
 <br>
+
 ### 9위 : [Link](https://www.kaggle.com/c/talkingdata-adtracking-fraud-detection/discussion/56279#latest-326008)
 
 * Device 3032 : delete
 * first click gets 16:00:00.00, second gets 16:00:00.01, next 16:00:00.02
+
 <br>
+
 
 ### 11위 : [Link1](https://www.kaggle.com/c/talkingdata-adtracking-fraud-detection/discussion/56250), [Link2](https://www.kaggle.com/lperez/no-ram-fast-feature-engineering-with-big-query)
 
 * 구글 빅쿼리 활용  
 개인적으로 매우 매력적인 접근 방식  
-모든 파생 변수 생성까지 20분 이내로 끝난다는 이점이 있다.
+모든 파생 변수 생성까지 20분 이내로 끝난다는 이점이 있다.  
+
 <br>
+
+
 ### 13위 : [Link](https://www.kaggle.com/c/talkingdata-adtracking-fraud-detection/discussion/56333)
 
 * Use test supplement: it is crucial
@@ -125,7 +133,9 @@ That's for the gold teams. More sharing from other teams below.
 
 ---
 
-### 위 브링핑 중 중요 내용으로 생각되는 포인트
+### 위 브링핑 중 중요 내용으로 생각되는 포인트  
+
+<br>
 
 * negative down-sampling
 1위 팀이 사용한 샘플링 방법  
@@ -148,6 +158,7 @@ matching 파일이 있지만, 내공 부족으로 auc 향상에는 실패
 
 ### 현재 응용 상황 및 마무리
 
+<br>
 여러 차례 test supplement 활용했지만, 좋은 결과를 보지 못했고, 다른 방법들로 개선 작업 중이다.
 
 |  <center>Model</center> |  <center>Size</center> |  <center>Valid AUC</center> | <center>LB Score </center> |
