@@ -10,7 +10,7 @@ Part1은 첫 시작부터 4월말까지의 경험으로 작성해 본다.
 ### Intro  
 왜 Fraud Click을 찾아야 하는가?   
 
-[![Video Label](https://i.kinja-img.com/gawker-media/image/upload/s--ZL-sFioc--/c_fit,f_auto,fl_progressive,q_80,w_636/wnus15o6tm4ekewlelgn.jpg)](https://i.kinja-img.com/gawker-media/image/upload/imuqp7dbsu41o3socgwi.mp4)  
+[![Video Label](https://i.kinja-img.com/gawker-media/image/upload/s--ZL-sFioc--/c_fit,f_auto,fl_progressive,q_80,w_636/wnus15o6tm4ekewlelgn.jpg)](https://i.kinja-img.com/gawker-media/image/upload/imuqp7dbsu41o3socgwi.mp4){: width="50%" height="50%"}  
 Chinese Farm  
 
 Fraud라는 용어 자체의 불편한 경험이 있지만,  
