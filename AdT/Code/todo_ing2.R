@@ -18,7 +18,7 @@ colnames(adt)
 library(caret)
 set.seed(777)
 y <- adt[tri]$is_attributed
-idx <- createDataPartition(y, p= 0.85, list = F)
+idx <- createDataPartition(y, p= 0.9, list = F)
 cat_f <- c("app", "device", "os", "channel", "click_hour")
 adtr <- adt[, -c("ip", "click_time", "is_attributed")]
 library(pryr)
