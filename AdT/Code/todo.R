@@ -110,14 +110,14 @@ saveRDS(adt, "adt_2nd.RDS")
 #adt$clicker_ch_Next <- ifelse(adt$clicker_ch_Next <0 , 0 , adt$clicker_ch_Next)
 
 # adt[, clicker_Nmean := as.integer(mean(clicker_Next)), by = .(ip, device, os)]
-# adt[, clicker_app_Nmean := as.integer(mean(clicker_app_Next)), 
+# adt[, clicker_app_Nmean := as.integer(mean(clicker_app_Next)),
 #     by = .(ip, device, os,app)]
-# adt[, clicker_ch_Nmean := as.integer(mean(clicker_ch_Next)), 
+# adt[, clicker_ch_Nmean := as.integer(mean(clicker_ch_Next)),
 #     by = .(ip, device, os, app, channel)]
 # adt[, clicker_Pmean := as.integer(mean(clicker_prev)), by = .(ip, device, os)]
-# adt[, clicker_app_Pmean := as.integer(mean(clicker_app_prev)), 
+# adt[, clicker_app_Pmean := as.integer(mean(clicker_app_prev)),
 #     by = .(ip, device, os,app)]
-# adt[, clicker_ch_Pmean := as.integer(mean(clicker_ch_prev)), 
+# adt[, clicker_ch_Pmean := as.integer(mean(clicker_ch_prev)),
 #     by = .(ip, device, os, app, channel)]
 # 
 # adt[, clicker_Nmed := median(clicker_Next), by = .(ip, device, os)]

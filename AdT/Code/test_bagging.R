@@ -4,14 +4,14 @@ sub1 <- fread(paste0("../SubM/",files[1]))
 sub2 <- fread(paste0("../SubM/",files[2]))
 sub3 <- fread(paste0("../SubM/",files[3]))
 sub4 <- fread(paste0("../SubM/",files[4]))
+sub5 <- fread(paste0("../SubM/",files[5]))
 
-
-newsub <- cbind(sub1, sub2[,2], sub3[,2], sub4[,2])
-setnames(newsub, c("click_id", 1:4))
+newsub <- cbind(sub1, sub2[,2], sub3[,2], sub4[,2], sub5[,2])
+setnames(newsub, c("click_id", 1:5))
 head(newsub)
 newsub[, is_attributed := rowMeans(newsub[,-1])]
 newsub <- newsub[, c("click_id", "is_attributed")]
-fwrite(newsub, "bagging1.csv")
+fwrite(newsub, "bagging2.csv")
 
 
 
