@@ -21,8 +21,12 @@ y <- adt[tri]$is_attributed
 idx <- createDataPartition(y, p= 0.9, list = F)
 # cat_f <- c("app", "device", "os", "channel", "click_hour")
 # cat_f <- c("app", "device", "os", "channel", "click_hour", "clicker_app_Nmean", "clicker_app_Nmed")
+# cat_f <- c("app", "device", "os", "channel", "click_hour", 
+#            "ip_hw", "ip_app", "ip_dev", "ip_os", "ip_ch")
+# cat_f <- c("app", "device", "os", "channel", "click_hour", 
+#            "app_cnt", "dev_cnt", "os_cnt", "ch_cnt")
 cat_f <- c("app", "device", "os", "channel", "click_hour", 
-           "ip_hw", "ip_app", "ip_dev", "ip_os", "ip_ch")
+           "clicker", "clicker_app", "app_dev", "app_os", "app_ch")
 adtr <- adt[, -c("ip", "click_time", "is_attributed")]
 library(pryr)
 mem_used()
