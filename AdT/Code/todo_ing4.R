@@ -14,19 +14,44 @@ library(lubridate)
 # saveRDS(adt, "fadt_3rd.RDS")
 adt <- readRDS("50adt_3rd.RDS")
 
+adt[, clicker_Nmean2 := as.integer(mean(clicker_Next2)), by = .(ip, device, os)]
+adt[, clicker_app_Nmean2 := as.integer(mean(clicker_app_Next2)),
+    by = .(ip, device, os,app)]
+adt[, clicker_ch_Nmean2 := as.integer(mean(clicker_ch_Next2)),
+    by = .(ip, device, os, app, channel)]
+adt[, clicker_Pmean2 := as.integer(mean(clicker_prev2)), by = .(ip, device, os)]
+adt[, clicker_app_Pmean2 := as.integer(mean(clicker_app_prev2)),
+    by = .(ip, device, os,app)]
+adt[, clicker_ch_Pmean2 := as.integer(mean(clicker_ch_prev2)),
+    by = .(ip, device, os, app, channel)]
+
+adt[, clicker_Nmed2 := as.integer(median(clicker_Next2)), by = .(ip, device, os)]
+adt[, clicker_app_Nmed2 := as.integer(median(clicker_app_Next2)), by = .(ip, device, os,app)]
+adt[, clicker_ch_Nmed2 := as.integer(median(clicker_ch_Next2)), by = .(ip, device, os, app, channel)]
+adt[, clicker_Pmed2 := as.integer(median(clicker_prev2)), by = .(ip, device, os)]
+adt[, clicker_app_Pmed2 := as.integer(median(clicker_app_prev2)), by = .(ip, device, os,app)]
+adt[, clicker_ch_Pmed2 := as.integer(median(clicker_ch_prev2)), by = .(ip, device, os, app, channel)]
+colnames(adt)
+
+saveRDS(adt, "fadt_4th.RDS") # name error 50e6
+
 tri <- readRDS("50tri_1st.RDS")
 library(caret)
 set.seed(777)
 y <- adt[tri]$is_attributed
 idx <- createDataPartition(y, p= 0.9, list = F)
-# cat_f <- c("app", "device", "os", "channel", "click_hour")
+cat_f <- c("app", "device", "os", "channel", "click_hour")
 # cat_f <- c("app", "device", "os", "channel", "click_hour", "clicker_app_Nmean", "clicker_app_Nmed")
 # cat_f <- c("app", "device", "os", "channel", "click_hour", 
 #            "ip_hw", "ip_app", "ip_dev", "ip_os", "ip_ch")
 # cat_f <- c("app", "device", "os", "channel", "click_hour", 
 #            "app_cnt", "dev_cnt", "os_cnt", "ch_cnt")
-cat_f <- c("app", "device", "os", "channel", "click_hour", 
-           "clicker", "clicker_app", "app_dev", "app_os", "app_ch")
+# cat_f <- c("app", "device", "os", "channel", "click_hour", 
+#            "clicker", "clicker_app", "app_dev", "app_os", "app_ch")
+# cat_f <- c("app", "device", "os", "channel", "click_hour", 
+#            "app_ch_N", "clicker_Last", "clicker_app_Last", "clicker_ch_Last")
+# cat_f <- c("app", "device", "os", "channel", "click_hour", 
+#            "app_ch_N", "clicker_Last", "clicker_app_Last", "clicker_ch_Last")
 adtr <- adt[, -c("ip", "click_time", "is_attributed")]
 library(pryr)
 mem_used()
@@ -37,6 +62,8 @@ library(lightgbm)
 adte <- as.matrix(adtr[-tri])
 # saveRDS(adte, "fadte.RDS")
 # rm(adte); gc()
+saveRDS(adte, "50adte_4th.RDS")
+rm(adte); gc()
 dtrain <- lgb.Dataset(data = as.matrix(adtr[tri][idx,]), 
                       label = y[idx],
                       categorical_feature = cat_f)
@@ -75,7 +102,8 @@ mem_used()
 rm(dval, dtrain, idx, y); gc()
 mem_used()
 # adte <- readRDS("fadte.RDS")
-adte <- readRDS("50adte.RDS")
+# adte <- readRDS("50adte.RDS")
+adte <- readRDS("50adte_4th.RDS")
 realpred <- predict(model_lgbm, adte, n = model_lgbm$best_iter)
 sub <- fread("../input/sample_submission.csv")
 sub$is_attributed <- round(realpred, 6)
