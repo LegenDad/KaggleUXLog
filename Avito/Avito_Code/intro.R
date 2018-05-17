@@ -1,0 +1,10 @@
+library(data.table)
+avi <- fread("../input/train.csv")
+
+# install.packages("tidyverse")
+library(tidyverse)
+avi <- read_csv("../input/train.csv")
+head(avi)
+glimpse(avi)
+str(avi)
+colnames(avi)
