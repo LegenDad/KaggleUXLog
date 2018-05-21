@@ -5,6 +5,17 @@
 library(tidyverse)
 avi <- read_csv("../input/train.csv")
 head(avi)
+
+na_cnt <- sapply(avi, function(x) sum(is.na(x)))
+na_cnt[na_cnt >0]
+library(Amelia)
+??Amelia
+missmap(avi, main='NA')
+
+# intro -------------------------------------------------------------------
+
+
+
 glimpse(avi)
 colnames(avi)
 summary(avi$item_id)
@@ -44,6 +55,24 @@ str(avi$deal_probability)
 range(avi$deal_probability)
 
 
+# period file -------------------------------------------------------------
+
+colnames(avi)
 period <- read_csv("../input/periods_train.csv")
-head(period)
-period[period$item_id == "b912c3c6a6ad",]
+head(avi$item_id)
+range(avi$activation_date)
+range(period$activation_date)
+head(period )
+glimpse(period)
+tail <- tail(avi$item_id)
+tail(avi$activation_date)
+period[period$item_id =="ba83aefab5dc" ,]
+period[period$item_id =="d1f0910d2126" ,]
+period[period$item_id =="bc04866bc803" ,]
+period[period$item_id =="8ab4c1e56046" ,]
+avi[avi$item_id == "80bf58082ad3", ]
+period[period$item_id =="80bf58082ad3" ,]
+
+# active file -------------------------------------------------------------
+
+active <- read_csv("../input/train_active.csv")
