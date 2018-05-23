@@ -3,14 +3,40 @@
 
 # install.packages("tidyverse")
 library(tidyverse)
+library(knitr)
 avi <- read_csv("../input/train.csv")
-head(avi)
+avite <- read_csv("../input/test.csv")
+colnames(avi)
+colnames(avite)
+avi_na <- sapply(avi, function(x) sum(is.na(x)))
+avite_na <- sapply(avite, function(x) sum(is.na(x)))
+kable(avi_na[avi_na >0])
+range(avi$deal_probability)
 
-na_cnt <- sapply(avi, function(x) sum(is.na(x)))
-na_cnt[na_cnt >0]
-library(Amelia)
-??Amelia
-missmap(avi, main='NA')
+head(sort(table(avi$region), decreasing = T))
+head(sort(table(avite$region), decreasing = T))
+head(sort(table(avi$city), decreasing = T))
+head(sort(table(avite$city), decreasing = T))
+head(sort(table(avi$category_name), decreasing = T))
+head(sort(table(avite$category_name), decreasing = T))
+head(sort(table(avi$parent_category_name), decreasing = T))
+head(sort(table(avite$parent_category_name), decreasing = T))
+head(sort(table(avi$param_1), decreasing = T))
+head(sort(table(avite$param_1), decreasing = T))
+head(sort(table(avi$param_2), decreasing = T))
+head(sort(table(avite$param_2), decreasing = T))
+head(sort(table(avi$param_3), decreasing = T))
+head(sort(table(avite$param_3), decreasing = T))
+head(sort(table(avi$deal_probability), decreasing = T))
+tail(sort(table(avi$deal_probability), decreasing = T))
+range(avi$activation_date)
+range(avite$activation_date)
+summary(avi$price)
+summary(avite$price)
+table(avi$user_type)
+table(avite$user_type)
+prop.table(table(avi$user_type))
+prop.table(table(avite$user_type))
 
 # intro -------------------------------------------------------------------
 
@@ -55,24 +81,16 @@ str(avi$deal_probability)
 range(avi$deal_probability)
 
 
-# period file -------------------------------------------------------------
+periods_tr <- read_csv("../input/periods_train.csv")
+head(periods_tr)
+glimpse(periods_tr)
+glimpse(avi)
+TotalNumberOfRows = nrow(avi)
 
-colnames(avi)
-period <- read_csv("../input/periods_train.csv")
-head(avi$item_id)
-range(avi$activation_date)
-range(period$activation_date)
-head(period )
-glimpse(period)
-tail <- tail(avi$item_id)
-tail(avi$activation_date)
-period[period$item_id =="ba83aefab5dc" ,]
-period[period$item_id =="d1f0910d2126" ,]
-period[period$item_id =="bc04866bc803" ,]
-period[period$item_id =="8ab4c1e56046" ,]
-avi[avi$item_id == "80bf58082ad3", ]
-period[period$item_id =="80bf58082ad3" ,]
+train <-train %>%
+  mutate(title_len = str_count(title)) %>%
+  mutate(description_len = str_count(description))
 
-# active file -------------------------------------------------------------
-
-active <- read_csv("../input/train_active.csv")
+test <-test %>%
+  mutate(title_len = str_count(title)) %>%
+  mutate(description_len = str_count(description))
