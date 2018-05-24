@@ -4,6 +4,7 @@
 # install.packages("tidyverse")
 library(tidyverse)
 library(knitr)
+library(ggthemes)
 avi <- read_csv("../input/train.csv")
 avite <- read_csv("../input/test.csv")
 colnames(avi)
@@ -38,48 +39,54 @@ table(avite$user_type)
 prop.table(table(avi$user_type))
 prop.table(table(avite$user_type))
 
-# intro -------------------------------------------------------------------
 
+# region ------------------------------------------------------------------
 
+head(sort(table(avi$region), decreasing = T))
+head(sort(table(avite$region), decreasing = T))
 
-glimpse(avi)
-colnames(avi)
-summary(avi$item_id)
-str(avi$item_id)
-summary(avi$user_id)
-summary(avi$region)
-summary(avi$city)
-summary(avi$parent_category_name)
-summary(avi$category_name)
-str(avi$category_name)
-summary(avi$param_1)
-str(avi$param_1)
-summary(avi$param_2)
-summary(avi$param_3)
-str(avi$param_3)  # NA  862565
-sum(is.na(avi$param_3))
-summary(avi$title)
-str(avi$title)
-summary(avi$description)
-summary(avi$price)  # NA 85362
-str(avi$price)
-summary(avi$item_seq_number)
-str(avi$item_seq_number)
-summary(avi$activation_date)
-str(avi$activation_date)
-range(avi$activation_date)  # "2017-03-15" "2017-04-07"
-summary(avi$user_type)
-str(avi$user_type)
-table(avi$user_type) # Company, Private, Shop (3 factors)
-summary(avi$image) # Id code of image. Ties to a jpg file in train_jpg. 
-str(avi$image)     # Not every ad has an image
-sum(is.na(avi$image))  # NA 112588
-summary(avi$image_top_1) # NA 112588
-str(avi$image_top_1) # Avito's classification code for the image.
-summary(avi$deal_probability)
-str(avi$deal_probability)
-range(avi$deal_probability)
+region <- c("Краснодарский край","Свердловская область", 
+            "Ростовская область","Татарстан","Челябинская область",
+            "Нижегородская область","Самарская область",
+            "Башкортостан","Пермский край","Новосибирская область",
+            "Ставропольский край","Ханты-Мансийский АО",
+            "Воронежская область","Иркутская область",
+            "Тульская область","Тюменская область","Белгородская область")
+region_en <- c("Krasnodar","Sverdlovsk","Rostov","Tatarstan", 
+               "Chelyabinsk","Nizhny Novgorod","Samara", 
+               "Bashkortostan","Perm","Novosibirsk", 
+               "Stavropol","Khanty-Mansiysk Autonomous Okrug", 
+               "Voronezh","Irkutsk","Tula","Tyumen","Belgorod")
 
+df_regions_en <- as.data.frame(cbind(region,region_en))
+
+avi %>% group_by(region) %>% summarise(Count = n()) %>%
+  arrange(desc(Count)) %>% head(10) %>% kable()
+
+avi %>% group_by(region) %>% summarise(Count = n()) %>%
+  arrange(desc(Count)) %>% head(10) %>% left_join(df_regions_en) %>%
+  mutate(region_en = reorder(region_en, Count)) %>%
+  ggplot(aes(x=region_en, y=Count)) + 
+  geom_col() + coord_flip() + theme_wsj() +
+  geom_text(aes(x=region_en, y = 1, label=paste(round((Count/nrow(avi))*100,2), "%")), 
+            hjust = 0, vjust =.5,  fontface = 'bold', color="orange") + 
+  labs(x='region', y='count', title = 'Most Popular Region')
+
+avite %>% group_by(region) %>% summarise(Count = n()) %>%
+  arrange(desc(Count)) %>% head(10) %>% left_join(df_regions_en) %>%
+  mutate(region_en = reorder(region_en, Count)) %>%
+  ggplot(aes(x=region_en, y=Count)) + 
+  geom_col() + coord_flip() + theme_wsj() +
+  geom_text(aes(x=region_en, y = 1, label=paste(round((Count/nrow(avi))*100,2), "%")), 
+            hjust = 0, vjust =.5,  fontface = 'bold', color="orange") + 
+  labs(x='region', y='count', title = 'Most Popular Region')
+
+region_dt <- avi %>% group_by(region) %>% summarise(Count = n()) %>% 
+  arrange(desc(Count)) %>% head(10)
+avi %>% filter(region %in% region_dt$region) %>%
+  ggplot(aes(x=factor(region), y=deal_probability, fill= factor(region))) +
+  geom_boxplot() + theme_wsj() +
+  theme(axis.text.x = element_text(angle=90, hjust = 1))
 
 periods_tr <- read_csv("../input/periods_train.csv")
 head(periods_tr)
