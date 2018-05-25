@@ -1,17 +1,28 @@
+
+# intro -------------------------------------------------------------------
+
+
 # library(data.table)
 # avi <- fread("../input/train.csv")
 
 # install.packages("tidyverse")
 library(tidyverse)
 library(knitr)
+library(skimr)
+library(DT)
 library(ggthemes)
 avi <- read_csv("../input/train.csv")
 avite <- read_csv("../input/test.csv")
 colnames(avi)
 colnames(avite)
+# datatable(head(avi, 50))
+head(avi, 50) %>% datatable(filter = 'top', 
+                            options = list(pageLength = 15, autoWidth = T))
+
 avi_na <- sapply(avi, function(x) sum(is.na(x)))
 avite_na <- sapply(avite, function(x) sum(is.na(x)))
-kable(avi_na[avi_na >0])
+avi_na[avi_na >0]
+
 range(avi$deal_probability)
 
 head(sort(table(avi$region), decreasing = T))
@@ -84,9 +95,75 @@ avite %>% group_by(region) %>% summarise(Count = n()) %>%
 region_dt <- avi %>% group_by(region) %>% summarise(Count = n()) %>% 
   arrange(desc(Count)) %>% head(10)
 avi %>% filter(region %in% region_dt$region) %>%
-  ggplot(aes(x=factor(region), y=deal_probability, fill= factor(region))) +
-  geom_boxplot() + theme_wsj() +
+  ggplot(aes(x=factor(region), y=deal_probability, fill= region)) +
+  geom_boxplot() + theme_bw() + 
+  labs(x='Region', y="Deal Probablity", title="Distribution of Deal Probablity") + 
   theme(axis.text.x = element_text(angle=90, hjust = 1))
+
+
+# city --------------------------------------------------------------------
+
+city <-c("Краснодар","Екатеринбург","Новосибирск","Ростов-на-Дону","Нижний Новгород",
+         "Челябинск","Пермь","Казань","Самара","Омск")
+
+city_en <-c("Krasnodar","Ekaterinburg","Novosibirsk","Rostov-na-Donu",
+            "Nizhny Novgorod", "Chelyabinsk","Permian","Kazan","Samara","Omsk")
+
+df_city_en <- as.data.frame(cbind(city,city_en) )
+
+avi %>% group_by(city) %>% summarise(Count = n()) %>%
+  arrange(desc(Count)) %>% head(10) %>% left_join(df_city_en) %>% 
+  mutate(city_en = reorder(city_en, Count)) %>% 
+  ggplot(aes(x=city_en, y=Count)) + 
+  labs(x='City', y= 'Count', title = 'Most Popular City') + 
+  geom_col() + coord_flip() + theme_wsj()
+
+avi %>% group_by(city) %>% summarise(Count = n()) %>%
+  arrange(desc(Count)) %>% head(10) %>% left_join(df_city_en) %>% datatable()
+  
+
+# category ----------------------------------------------------------------
+category_name <- c("Одежда, обувь, аксессуары",
+                   "Детская одежда и обувь",
+                   "Товары для детей и игрушки",
+                   "Квартиры",
+                   "Телефоны",
+                   "Мебель и интерьер",
+                   "Предложение услуг",
+                   "Автомобили",
+                   "Ремонт и строительство",
+                   "Бытовая техника",
+                   "Недвижимость за рубежом",
+                   "Квартиры",
+                   "Дома, дачи, коттеджи",
+                   "Земельные участки",
+                   "Комнаты",
+                   "Грузовики и спецтехника",
+                   "Готовый бизнес",
+                   "Гаражи и машиноместа",
+                   "Коммерческая недвижимость")
+
+category_name_en <- c("Clothes,shoes accessories" , 
+                      "Children's clothing and footwear" ,
+                      "Goods for children and toys" , 
+                      "Apartments" , 
+                      "Phones",
+                      "Furniture and interior",
+                      "Offer of services",
+                      "Cars",
+                      "Repair and construction",
+                      "Appliances",
+                      "Property Abroad", "Apartments", 
+                      "Houses, cottages, cottages",
+                      "Land",
+                      "Rooms",
+                      "Trucks and special equipment",
+                      "Ready business", 
+                      "Garages and parking places",
+                      "Commercial Property")
+
+df_category_en <- as.data.frame(cbind(category_name,category_name_en ) )
+
 
 periods_tr <- read_csv("../input/periods_train.csv")
 head(periods_tr)

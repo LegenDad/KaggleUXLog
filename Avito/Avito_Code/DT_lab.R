@@ -3,7 +3,7 @@ wine %>%
     pageLength = 15, autoWidth = TRUE
   ))
 library(data.table)
-install.packages("DT")
+#install.packages("DT")
 library(DT)
 head(avi, 50) %>% 
   datatable(filter = 'top', options = list(
