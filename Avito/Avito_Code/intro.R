@@ -215,19 +215,21 @@ avi %>% filter(!is.na(image_top_1)) %>% group_by(image_top_1) %>%
   geom_text(aes(x=factor(image_top_1), y=5000, 
                 label = paste(round(Count*100/nrow(avi),2), "%")), 
             hjust=0, vjust=.5, fontface='bold')
-# unname ------------------------------------------------------------------
+
+summary(avi$deal_probability)
+boxplot(avi$deal_probability)
+avi %>% filter(!is.na(image_top_1) & deal_probability > .2) %>% group_by(image_top_1) %>%
+  summarise(Count = n()) %>% arrange(desc(Count)) %>% head(10) %>% 
+  ggplot(aes(x=reorder(image_top_1, Count), y=Count)) + 
+  geom_col(fill = "lightblue") + coord_flip() + theme_bw() + 
+  labs(x='image_top_1', y='Count', title="Most Popular ImageCode") + 
+  geom_text(aes(x=factor(image_top_1), y=2000, 
+                label = paste(round(Count*100/nrow(avi),2), "%")), 
+            hjust=0, vjust=.5, fontface='bold')
 
 
-periods_tr <- read_csv("../input/periods_train.csv")
-head(periods_tr)
-glimpse(periods_tr)
-glimpse(avi)
-TotalNumberOfRows = nrow(avi)
+# param1 ------------------------------------------------------------------
+# intro2.R 
 
-train <-train %>%
-  mutate(title_len = str_count(title)) %>%
-  mutate(description_len = str_count(description))
 
-test <-test %>%
-  mutate(title_len = str_count(title)) %>%
-  mutate(description_len = str_count(description))
+
