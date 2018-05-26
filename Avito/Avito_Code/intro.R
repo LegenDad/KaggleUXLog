@@ -1,11 +1,10 @@
 
 # intro -------------------------------------------------------------------
 
-
 # library(data.table)
 # avi <- fread("../input/train.csv")
-
 # install.packages("tidyverse")
+
 library(tidyverse)
 library(knitr)
 library(skimr)
@@ -21,7 +20,7 @@ head(avi, 50) %>% datatable(filter = 'top',
 
 avi_na <- sapply(avi, function(x) sum(is.na(x)))
 avite_na <- sapply(avite, function(x) sum(is.na(x)))
-avi_na[avi_na >0]
+avi_na[avi_na >0]; avite_na[avi_na >0]
 
 range(avi$deal_probability)
 
@@ -43,6 +42,8 @@ head(sort(table(avi$deal_probability), decreasing = T))
 tail(sort(table(avi$deal_probability), decreasing = T))
 range(avi$activation_date)
 range(avite$activation_date)
+options(scipen=100)
+range(avi$price, na.rm= T)
 summary(avi$price)
 summary(avite$price)
 table(avi$user_type)
@@ -50,6 +51,14 @@ table(avite$user_type)
 prop.table(table(avi$user_type))
 prop.table(table(avite$user_type))
 
+# intro_checkpoint --------------------------------------------------------
+colnames(avi); colnames(avite)
+avi_na[avi_na >0]; avite_na[avi_na >0]
+summary(avi$price)
+summary(avite$price)
+table(avi$user_type)
+range(avi$activation_date)
+range(avite$activation_date)
 
 # region ------------------------------------------------------------------
 
@@ -72,7 +81,7 @@ region_en <- c("Krasnodar","Sverdlovsk","Rostov","Tatarstan",
 df_regions_en <- as.data.frame(cbind(region,region_en))
 
 avi %>% group_by(region) %>% summarise(Count = n()) %>%
-  arrange(desc(Count)) %>% head(10) %>% kable()
+  arrange(desc(Count)) %>% head(10)  
 
 avi %>% group_by(region) %>% summarise(Count = n()) %>%
   arrange(desc(Count)) %>% head(10) %>% left_join(df_regions_en) %>%
@@ -134,7 +143,6 @@ category_name <- c("Одежда, обувь, аксессуары",
                    "Ремонт и строительство",
                    "Бытовая техника",
                    "Недвижимость за рубежом",
-                   "Квартиры",
                    "Дома, дачи, коттеджи",
                    "Земельные участки",
                    "Комнаты",
@@ -153,7 +161,7 @@ category_name_en <- c("Clothes,shoes accessories" ,
                       "Cars",
                       "Repair and construction",
                       "Appliances",
-                      "Property Abroad", "Apartments", 
+                      "Property Abroad", 
                       "Houses, cottages, cottages",
                       "Land",
                       "Rooms",
@@ -163,6 +171,51 @@ category_name_en <- c("Clothes,shoes accessories" ,
                       "Commercial Property")
 
 df_category_en <- as.data.frame(cbind(category_name,category_name_en ) )
+
+avi %>% group_by(category_name) %>% summarise(Count = n()) %>%
+  arrange(desc(Count)) %>% head(10) %>% left_join(df_category_en) %>% 
+  ggplot(aes(x=reorder(category_name_en, Count), y=Count)) + 
+  geom_col(fill = "lightblue") + coord_flip() + theme_bw() + 
+  labs(x='Category', y='Count', title='Most Popular Category') + 
+  geom_text(aes(x=category_name_en, y= 5000, 
+                label= paste(round(Count*100/nrow(avi),1), "%")), 
+            hjust = 0, vjust=.5, fontface='bold')
+  
+
+# parent category ---------------------------------------------------------
+
+parent_category_name <- c("Личные вещи","Для дома и дачи",
+                          "Бытовая электроника","Недвижимость",
+                          "Хобби и отдых","Транспорт",
+                          "Услуги","Животные","Для бизнеса")
+
+parent_category_name_en <- c("Personal things","home and cottages",
+                             "Consumer electronics","Property",
+                             "Hobbies and Recreation","Transport",
+                             "services","Animals","business")
+
+df_parentcategory_en <- as.data.frame(cbind(parent_category_name,parent_category_name_en ) )
+
+avi %>% group_by(parent_category_name) %>% summarise(Count = n()) %>% 
+  left_join(df_parentcategory_en) %>% arrange(desc(Count)) %>% 
+  ggplot(aes(x=reorder(parent_category_name_en, Count), y=Count)) + 
+  geom_col(fill="lightblue") + coord_flip() + theme_bw() + 
+  labs(x="Parent Category", y="Count", title = "Most Popular Parent Category") + 
+  geom_text(aes(x=parent_category_name_en, y = 5000, label= paste(round(Count*100/nrow(avi),1), "%")  ), 
+            hjust=0, vjust =.5, fontface='bold')
+
+# image_top_1 --------------------------------------------------------------
+range(avi$image_top_1, na.rm=T)
+summary(avi$image_top_1)
+avi %>% filter(!is.na(image_top_1)) %>% group_by(image_top_1) %>%
+  summarise(Count = n()) %>% arrange(desc(Count)) %>% head(10) %>% 
+  ggplot(aes(x=reorder(image_top_1, Count), y=Count)) + 
+  geom_col(fill = "lightblue") + coord_flip() + theme_bw() + 
+  labs(x='image_top_1', y='Count', title="Most Popular ImageCode") + 
+  geom_text(aes(x=factor(image_top_1), y=5000, 
+                label = paste(round(Count*100/nrow(avi),2), "%")), 
+            hjust=0, vjust=.5, fontface='bold')
+# unname ------------------------------------------------------------------
 
 
 periods_tr <- read_csv("../input/periods_train.csv")
