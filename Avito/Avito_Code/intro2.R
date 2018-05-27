@@ -7,13 +7,20 @@ library(skimr)
 library(DT)
 library(ggthemes)
 avi <- read_csv("../input/train.csv")
-avite <- read_csv("../input/test.csv")
+# avite <- read_csv("../input/test.csv")
 
 
 # param1 ------------------------------------------------------------------
-# intro2.R 
+param_1 <- c("Женская одежда","Для девочек","Для мальчиков",
+             "Продам","С пробегом","Аксессуары",
+             "Мужская одежда","Другое",
+             "Игрушки","Детские коляски")
 
+param_1_en <- c("Women's clothing","For girls","For boys",
+                "Selling","With mileage","Accessories","Men's clothing","Other",
+                "Toys","Baby carriages")
 
+df_param_1_en <- as.data.frame(cbind(param_1,param_1_en ) )
 
 # unname ------------------------------------------------------------------
 
