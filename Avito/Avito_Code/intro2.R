@@ -132,23 +132,45 @@ avite %>% group_by(image_codeYN) %>% summarise(Count = n()) %>%
   geom_text(aes(x=factor(image_codeYN), y=100000, 
                 label= paste0(Count, "\n\n\n", 
                               round(Count*100/nrow(avi),1), "%")))
-cor(avi$image_codeYN, avi$deal_probability)
 
-region_dt <- avi %>% group_by(region) %>% summarise(Count = n()) %>% 
-  arrange(desc(Count)) %>% head(10)
-avi %>% filter(region %in% region_dt$region) %>%
-  ggplot(aes(x=factor(region), y=deal_probability, fill= region)) +
-  geom_boxplot() + theme_bw() + 
-  labs(x='Region', y="Deal Probablity", title="Distribution of Deal Probablity") + 
-  theme(axis.text.x = element_text(angle=90, hjust = 1))
+ggplot(data=avi, aes(x=factor(image_codeYN), y=deal_probability)) +
+  geom_boxplot(fill=c("lightgreen", "lightblue")) + theme_wsj() + 
+  labs(x="image_codeYN", y="Deal Probability", 
+       title = "Distribution of Deal Probability on ImageCode")
+  
 
-
-# unname ------------------------------------------------------------------
-
-
+# Duration of Ad ---------------------------------------------------------------------
 periods_tr <- read_csv("../input/periods_train.csv")
 head(periods_tr)
 glimpse(periods_tr)
+
+periods_tr$duration_ad <- as.integer(periods_tr$date_to - periods_tr$date_from)
+
+ggplot(periods_tr, aes(x=duration_ad)) + 
+  geom_bar(fill = "lightblue") + theme_bw() +
+  labs(x="Duration of AD", y="Count", title = "Distribution of Duration of AD")
+  
+summary(periods_tr$duration_ad)
+
+periods_te <- read_csv("../input/periods_test.csv")
+head(periods_te)
+glimpse(periods_te)
+
+periods_te$duration_ad <- as.integer(periods_te$date_to - periods_te$date_from)
+
+ggplot(periods_te, aes(x=duration_ad)) + 
+  geom_bar(fill = "lightblue") + theme_bw() +
+  labs(x="Duration of AD", y="Count", title = "Distribution of Duration of AD")
+
+summary(periods_te$duration_ad)
+
+
+
+# Deal Probablity ---------------------------------------------------------
+
+
+
+# unname ------------------------------------------------------------------
 glimpse(avi)
 TotalNumberOfRows = nrow(avi)
 
