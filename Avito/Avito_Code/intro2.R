@@ -6,6 +6,7 @@ library(knitr)
 library(skimr)
 library(DT)
 library(ggthemes)
+library(lubridate)
 avi <- read_csv("../input/train.csv")
 avite <- read_csv("../input/test.csv")
 avi_na <- sapply(avi, function(x) sum(is.na(x)))
@@ -167,8 +168,120 @@ summary(periods_te$duration_ad)
 
 
 # Deal Probablity ---------------------------------------------------------
+summary(avi$deal_probability)
+avi %>% ggplot(aes(x=deal_probability)) + 
+  geom_histogram(bins=30, fill = 'lightblue') + theme_wsj() + 
+  labs(x="Deal Probability", y= "Count", title = "Distribution of Deal Probability")
+
+avi %>% ggplot(aes(x=deal_probability)) + 
+  geom_histogram(bins=10, fill = 'lightblue') + theme_wsj() + 
+  labs(x="Deal Probability", y= "Count", title = "Distribution of Deal Probability")
+
+avi %>% ggplot(aes(x=deal_probability)) + 
+  geom_histogram(bins=5, fill = 'lightblue') + theme_wsj() + 
+  labs(x="Deal Probability", y= "Count", title = "Distribution of Deal Probability")
 
 
+# user type ---------------------------------------------------------------
+table(avi$user_type)
+avi %>% group_by(user_type) %>% summarise(Count = n()) %>%
+  ggplot(aes(x=user_type, y=Count)) + 
+  geom_col(color='orange', fill = 'lightblue') + 
+  labs(x='User Type', y='Count', title = 'User Type') + 
+  geom_text(aes(x=user_type, y= 50000, 
+                label = paste(round(Count*100/nrow(avi)), "%")), 
+            size = 5, fontface='bold')
+
+avite %>% group_by(user_type) %>% summarise(Count = n()) %>%
+  ggplot(aes(x=user_type, y=Count)) + 
+  geom_col(color='orange', fill = 'lightblue') + 
+  labs(x='User Type', y='Count', title = 'User Type') + 
+  geom_text(aes(x=user_type, y= 15000, 
+                label = paste(round(Count*100/nrow(avite)), "%")), 
+            size = 5, fontface='bold')
+
+
+
+# activation day of week ----------------------------------------------------------
+range(avi$activation_date)
+avi %>% mutate(wday = wday(activation_date, labe=T, locale="UK")) %>% 
+  group_by(wday) %>% summarise(Count=n()) %>%
+  ggplot(aes(x=wday, y=Count)) + 
+  geom_col(fill='lightblue', col='white') + theme_bw() + 
+  labs(x="Activation Weekday", y="Count", title="Activation Weekday")
+
+avite %>% mutate(wday = wday(activation_date, labe=T, locale="UK")) %>% 
+  group_by(wday) %>% summarise(Count=n()) %>%
+  ggplot(aes(x=wday, y=Count)) + 
+  geom_col(fill='lightblue', col='white') + theme_bw() + 
+  labs(x="Activation Weekday", y="Count", title="Activation Weekday")
+
+
+# activation day of day ---------------------------------------------------
+range(avi$activation_date)
+avi %>% mutate(day = day(activation_date)) %>% group_by(day) %>% 
+  summarise(Count = n()) %>% 
+  datatable(filter = "top", options = list(pageLength = 30, autoWidth= T))
+
+avite %>% mutate(day = day(activation_date)) %>% group_by(day) %>% 
+  summarise(Count = n()) %>% 
+  datatable(filter = "top", options = list(pageLength = 30, autoWidth= T))
+
+avi %>% mutate(day = day(activation_date)) %>% group_by(day) %>% 
+  summarise(Count = n()) %>% 
+  ggplot(aes(x=day, y=Count)) + geom_col()
+
+
+# price -------------------------------------------------------------------
+
+summary(avi$price)
+avi %>% filter(!is.na(price)) %>% ggplot(aes(x=price)) + 
+  geom_histogram(bins=50) + xlim(0, 100000) + ylim(0, 300000)
+
+avi %>%
+  ggplot(aes(x = price) )+
+  scale_x_log10(
+    breaks = scales::trans_breaks("log10", function(x) 10^x),
+    labels = scales::trans_format("log10", scales::math_format(10^.x))
+  ) +
+  scale_y_log10(
+    breaks = scales::trans_breaks("log10", function(x) 10^x),
+    labels = scales::trans_format("log10", scales::math_format(10^.x))
+  ) + 
+  geom_histogram(fill = 'orange',bins=50) +
+  labs(x = 'Price' ,y = 'Count', title = paste("Distribution of", "Price")) +
+  theme_bw()
+
+avite %>%
+  ggplot(aes(x = price) )+
+  scale_x_log10(
+    breaks = scales::trans_breaks("log10", function(x) 10^x),
+    labels = scales::trans_format("log10", scales::math_format(10^.x))
+  ) +
+  scale_y_log10(
+    breaks = scales::trans_breaks("log10", function(x) 10^x),
+    labels = scales::trans_format("log10", scales::math_format(10^.x))
+  ) + 
+  geom_histogram(fill = 'orange',bins=50) +
+  labs(x = 'Price' ,y = 'Count', title = paste("Distribution of", "Price")) +
+  theme_bw()
+
+
+
+# title legnth------------------------------------------------------------
+avi %>% mutate(title_len = str_count(title)) %>% 
+  ggplot(aes(x=title_len)) + geom_histogram(bins = 30, fill='lightblue') +
+  labs(x='Title Length', y='Count', title='Distibution of Title Length')
+
+avite %>% mutate(title_len = str_count(title)) %>% 
+  ggplot(aes(x=title_len)) + geom_histogram(bins = 30, fill='lightblue') +
+  labs(x='Title Length', y='Count', title='Distibution of Title Length')
+
+
+# description -------------------------------------------------------------
+
+avi %>% mutate(des_len = str_count(description)) %>% 
+  ggplot(aes(x=des_len)) + geom_histogram(bins=30, fill = 'lightblue')
 
 # unname ------------------------------------------------------------------
 glimpse(avi)
