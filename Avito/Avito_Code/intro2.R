@@ -281,7 +281,22 @@ avite %>% mutate(title_len = str_count(title)) %>%
 # description -------------------------------------------------------------
 
 avi %>% mutate(des_len = str_count(description)) %>% 
+  filter(des_len < 1000) %>% 
   ggplot(aes(x=des_len)) + geom_histogram(bins=30, fill = 'lightblue')
+
+
+
+# user_id -----------------------------------------------------------------
+length(unique(avi$user_id)) / nrow(avi)
+length(unique(avite$user_id)) / nrow(avi)
+
+avi %>% group_by(user_id) %>% summarise(Count=n()) %>% 
+  arrange(desc(Count)) %>% head(20) %>% 
+  ggplot(aes(x=reorder(user_id, Count), y=Count)) + 
+  geom_col(fill="steelblue") + coord_flip() +
+  labs(x="User ID", y="Count", title = "Most Popular User ID")
+
+
 
 # unname ------------------------------------------------------------------
 glimpse(avi)
@@ -294,3 +309,20 @@ train <-train %>%
 test <-test %>%
   mutate(title_len = str_count(title)) %>%
   mutate(description_len = str_count(description))
+
+
+# ---
+#   title: "EDA and XGB Avito"
+# author: "Bukun"
+# output:
+#   html_document:
+#   number_sections: true
+# toc: true
+# fig_width: 10
+# code_folding: hide
+# fig_height: 4.5
+# theme: cosmo
+# highlight: tango
+# ---
+#Preparation{.tabset .tabset-fade .tabset-pills}
+#{r,message=FALSE,warning=FALSE}
