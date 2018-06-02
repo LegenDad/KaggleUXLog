@@ -5,10 +5,14 @@ date: "2018년 6월 1일"
 output: 
   html_document:
     toc: true  # 목차 추가 옵션
+    toc_float : 
+      collapsed : false
     number_sections : true # 목차나 섹션 번호 부여 옵션 
     fig_width: 10 # figure size (default : 7*5)
     fig_height: 4.5
     code_folding : hide # code hide
+    theme : journal
+    highlight : espresso
 ---
 
 ```{r setup, include=FALSE}
@@ -22,15 +26,49 @@ This is an R Markdown document. Markdown is a simple formatting syntax for autho
 When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
 ```{r cars}
-summary(cars)
+library(tidyverse)
+library(knitr)
+library(skimr)
+library(DT)
+library(ggthemes)
+avi <- read_csv("../input/train.csv")
 ```
 
 ## Including Plots
 
 You can also embed plots, for example:
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r pressure}
+head(avi, 50) %>% datatable(filter = 'top', 
+                            options = list(pageLength = 15, autoWidth = T))
 ```
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+### R Markdown2
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+summary(cars)
+```
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r }
+summary(cars)
+```
+# R Markdown3
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+summary(cars)
+```
