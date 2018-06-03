@@ -31,7 +31,7 @@ library(knitr)
 library(skimr)
 library(DT)
 library(ggthemes)
-avi <- read_csv("../input/train.csv")
+# avi <- read_csv("../input/train.csv")
 ```
 
 ## Including Plots
@@ -39,8 +39,8 @@ avi <- read_csv("../input/train.csv")
 You can also embed plots, for example:
 
 ```{r pressure}
-head(avi, 50) %>% datatable(filter = 'top', 
-                            options = list(pageLength = 15, autoWidth = T))
+#head(avi, 50) %>% datatable(filter = 'top', 
+#                            options = list(pageLength = 15, autoWidth = T))
 ```
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
@@ -72,3 +72,14 @@ When you click the **Knit** button a document will be generated that includes bo
 ```{r}
 summary(cars)
 ```
+
+
+## Quarterly Results {.tabset .tabset-fade .tabset-pills}
+
+### By Product
+
+(tab content)
+
+### By Region
+
+(tab content)
