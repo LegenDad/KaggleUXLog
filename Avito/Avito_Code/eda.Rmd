@@ -2,14 +2,14 @@
 title: "EDA Avito"
 author: "LegenDad"
 date: "2018-06-04"
-output: 
+output:
   html_document:
     toc : true
-    toc_float : 
+    toc_float :
       collapsed : false
     number_sections : true
     fig_width : 10
-    fit_height : 4.5 
+    fit_height : 4.5
     code_folding : hide
     theme : journal
     highlight : espresso
@@ -25,7 +25,7 @@ From Description Page
 
 <br>
 
-18 Variables 
+18 Variables
 
 > * item_id - Ad id.
 > * user_id - User id.
@@ -84,7 +84,7 @@ summary(avite)
 
 ## Head train
 ```{r messagse=F, waring=F}
-head(avi, 50) %>% datatable(filter = 'top', 
+head(avi, 50) %>% datatable(filter = 'top',
                             options = list(pageLength = 10, autoWidth = T))
 
 ```
@@ -92,7 +92,7 @@ head(avi, 50) %>% datatable(filter = 'top',
 
 ## Head test
 ```{r messagse=F, waring=F}
-head(avite, 50) %>% datatable(filter = 'top', 
+head(avite, 50) %>% datatable(filter = 'top',
                             options = list(pageLength = 10, autoWidth = T))
 
 ```
@@ -135,9 +135,9 @@ length(unique(avite$user_id)) / nrow(avi)
 ### Most popular user_id
 
 ```{r message=F, warning=F}
-avi %>% group_by(user_id) %>% summarise(Count=n()) %>% 
-  arrange(desc(Count)) %>% head(20) %>% 
-  ggplot(aes(x=reorder(user_id, Count), y=Count)) + 
+avi %>% group_by(user_id) %>% summarise(Count=n()) %>%
+  arrange(desc(Count)) %>% head(20) %>%
+  ggplot(aes(x=reorder(user_id, Count), y=Count)) +
   geom_col(fill="steelblue") + coord_flip() +
   labs(x="User ID", y="Count", title = "Most Popular User ID")
 ```
@@ -147,17 +147,17 @@ avi %>% group_by(user_id) %>% summarise(Count=n()) %>%
 
 ### train
 ```{r, message=F, warning=F}
-region <- c("Краснодарский край","Свердловская область", 
+region <- c("Краснодарский край","Свердловская область",
             "Ростовская область","Татарстан","Челябинская область",
             "Нижегородская область","Самарская область",
             "Башкортостан","Пермский край","Новосибирская область",
             "Ставропольский край","Ханты-Мансийский АО",
             "Воронежская область","Иркутская область",
             "Тульская область","Тюменская область","Белгородская область")
-region_en <- c("Krasnodar","Sverdlovsk","Rostov","Tatarstan", 
-               "Chelyabinsk","Nizhny Novgorod","Samara", 
-               "Bashkortostan","Perm","Novosibirsk", 
-               "Stavropol","Khanty-Mansiysk Autonomous Okrug", 
+region_en <- c("Krasnodar","Sverdlovsk","Rostov","Tatarstan",
+               "Chelyabinsk","Nizhny Novgorod","Samara",
+               "Bashkortostan","Perm","Novosibirsk",
+               "Stavropol","Khanty-Mansiysk Autonomous Okrug",
                "Voronezh","Irkutsk","Tula","Tyumen","Belgorod")
 
 df_regions_en <- as.data.frame(cbind(region,region_en))
@@ -172,10 +172,10 @@ avi %>% group_by(region) %>% summarise(Count = n()) %>%
 avi %>% group_by(region) %>% summarise(Count = n()) %>%
   arrange(desc(Count)) %>% head(10) %>% left_join(df_regions_en) %>%
   mutate(region_en = reorder(region_en, Count)) %>%
-  ggplot(aes(x=region_en, y=Count)) + 
+  ggplot(aes(x=region_en, y=Count)) +
   geom_col() + coord_flip() + theme_wsj() +
-  geom_text(aes(x=region_en, y = 1, label=paste(round((Count/nrow(avi))*100,2), "%")), 
-            hjust = 0, vjust =.5,  fontface = 'bold', color="orange") + 
+  geom_text(aes(x=region_en, y = 1, label=paste(round((Count/nrow(avi))*100,2), "%")),
+            hjust = 0, vjust =.5,  fontface = 'bold', color="orange") +
   labs(x='region', y='count', title = 'Most Popular Region')
 ```
 
@@ -185,22 +185,22 @@ avi %>% group_by(region) %>% summarise(Count = n()) %>%
 avite %>% group_by(region) %>% summarise(Count = n()) %>%
   arrange(desc(Count)) %>% head(10) %>% left_join(df_regions_en) %>%
   mutate(region_en = reorder(region_en, Count)) %>%
-  ggplot(aes(x=region_en, y=Count)) + 
+  ggplot(aes(x=region_en, y=Count)) +
   geom_col() + coord_flip() + theme_wsj() +
-  geom_text(aes(x=region_en, y = 1, label=paste(round((Count/nrow(avi))*100,2), "%")), 
-            hjust = 0, vjust =.5,  fontface = 'bold', color="orange") + 
+  geom_text(aes(x=region_en, y = 1, label=paste(round((Count/nrow(avi))*100,2), "%")),
+            hjust = 0, vjust =.5,  fontface = 'bold', color="orange") +
   labs(x='region', y='count', title = 'Most Popular Region')
 
 ```
 
 ### Distribution of Deal Probablity
 ```{r, message=F, warning=F}
-region_dt <- avi %>% group_by(region) %>% summarise(Count = n()) %>% 
+region_dt <- avi %>% group_by(region) %>% summarise(Count = n()) %>%
   arrange(desc(Count)) %>% head(10)
 avi %>% filter(region %in% region_dt$region) %>%
   ggplot(aes(x=factor(region), y=deal_probability, fill= region)) +
-  geom_boxplot() + theme_bw() + 
-  labs(x='Region', y="Deal Probablity", title="Distribution of Deal Probablity") + 
+  geom_boxplot() + theme_bw() +
+  labs(x='Region', y="Deal Probablity", title="Distribution of Deal Probablity") +
   theme(axis.text.x = element_text(angle=90, hjust = 1))
 ```
 
@@ -217,10 +217,10 @@ city_en <-c("Krasnodar","Ekaterinburg","Novosibirsk","Rostov-na-Donu",
 df_city_en <- as.data.frame(cbind(city,city_en) )
 
 avi %>% group_by(city) %>% summarise(Count = n()) %>%
-  arrange(desc(Count)) %>% head(10) %>% left_join(df_city_en) %>% 
-  mutate(city_en = reorder(city_en, Count)) %>% 
-  ggplot(aes(x=city_en, y=Count)) + 
-  labs(x='City', y= 'Count', title = 'Most Popular City') + 
+  arrange(desc(Count)) %>% head(10) %>% left_join(df_city_en) %>%
+  mutate(city_en = reorder(city_en, Count)) %>%
+  ggplot(aes(x=city_en, y=Count)) +
+  labs(x='City', y= 'Count', title = 'Most Popular City') +
   geom_col() + coord_flip() + theme_wsj()
 
 ```
@@ -236,7 +236,7 @@ avi %>% group_by(city) %>% summarise(Count = n()) %>%
 
 
 
-## parent_category_name 
+## parent_category_name
 ## category_name       
 ## param_1              
 ## param_2              
