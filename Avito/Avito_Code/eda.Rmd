@@ -1,0 +1,155 @@
+---
+title: "EDA Avito"
+author: "LegenDad"
+date: "2018-06-04"
+output: 
+  html_document:
+    toc : true
+    toc_float : 
+      collapsed : false
+    number_sections : true
+    fig_width : 10
+    fit_height : 4.5 
+    code_folding : hide
+    theme : journal
+    highlight : espresso
+---
+
+# Introduction
+
+![](https://www.vostoknewventures.com/wp-content/uploads/2015/08/Avito_new_Vostok_small.png)
+
+From Description Page  
+
+> In their fourth Kaggle competition, Avito is challenging you to predict demand for an online advertisement based on its full description (title, description, images, etc.), its context (geographically where it was posted, similar ads already posted) and historical demand for similar ads in similar contexts. With this information, Avito can inform sellers on how to best optimize their listing and provide some indication of how much interest they should realistically expect to receive.
+
+<br>
+
+18 Variables 
+
+> * item_id - Ad id.
+> * user_id - User id.
+> * region - Ad region.
+> * city - Ad city.
+> * parent_category_name - Top level ad category as classified by Avito's ad model.
+> * category_name - Fine grain ad category as classified by Avito's ad model.
+> * param_1 - Optional parameter from Avito's ad model.
+> * param_2 - Optional parameter from Avito's ad model.
+> * param_3 - Optional parameter from Avito's ad model.
+> * title - Ad title.
+> * description - Ad description.
+> * price - Ad price.
+> * item_seq_number - Ad sequential number for user.
+> * activation_date- Date ad was placed.
+> * user_type - User type.
+> * image - Id code of image. Ties to a jpg file in train_jpg. Not every ad has an image.
+> * image_top_1 - Avito's classification code for the image.
+> * deal_probability - The target variable. This is the likelihood that an ad actually sold something. It's not possible to verify every transaction with certainty, so this column's value can be any float from zero to one.
+
+
+# Library & Importing {.tabset .tabset-fade .tabset-pills}
+
+## Loading Library
+```{r message=F, warning=F}
+library(tidyverse)
+library(knitr)
+library(skimr)
+library(DT)
+library(ggthemes)
+```
+## Importing Data
+```{r message=F, waring=F}
+avi <- read_csv("../input/train.csv")
+avite <- read_csv("../input/test.csv")
+```
+
+# Glimpse of Data {.tabset .tabset-fade .tabset-pills}
+
+## Glimpse of train
+```{r message=F, waring=F}
+glimpse(avi)
+```
+
+## Summary of train
+```{r message=F, waring=F}
+summary(avi)
+```
+
+## Summary of test
+```{r message=F, waring=F}
+summary(avite)
+```
+
+# LookUp & NA {.tabset .tabset-fade .tabset-pills}
+
+## Head train
+```{r messagse=F, waring=F}
+head(avi, 50) %>% datatable(filter = 'top', 
+                            options = list(pageLength = 10, autoWidth = T))
+
+```
+
+
+## Head test
+```{r messagse=F, waring=F}
+head(avite, 50) %>% datatable(filter = 'top', 
+                            options = list(pageLength = 10, autoWidth = T))
+
+```
+
+## NA
+```{r message=F, waring=F}
+avi_na <- sapply(avi, function(x) sum(is.na(x)))
+avite_na <- sapply(avite, function(x) sum(is.na(x)))
+avi_na[avi_na >0]; avite_na[avite_na >0]
+
+```
+
+
+# Variables
+
+## item_id {.tabset}
+
+### train
+```{r message=F, waring=F}
+sum(duplicated(avi$item_id))
+length(unique(avi$item_id)) == nrow(avi)
+```
+### test
+```{r message=F, waring=F}
+sum(duplicated(avite$item_id))
+length(unique(avite$item_id)) == nrow(avite)
+```
+all unique item_id
+
+## user_id
+
+```{r message=F, warning=F}
+length(unique(avi$user_id)) / nrow(avi)
+length(unique(avite$user_id)) / nrow(avi)
+
+avi %>% group_by(user_id) %>% summarise(Count=n()) %>% 
+  arrange(desc(Count)) %>% head(20) %>% 
+  ggplot(aes(x=reorder(user_id, Count), y=Count)) + 
+  geom_col(fill="steelblue") + coord_flip() +
+  labs(x="User ID", y="Count", title = "Most Popular User ID")
+
+```
+
+
+## region              
+## city
+## parent_category_name 
+## category_name       
+## param_1              
+## param_2              
+## param_3             
+## title                
+## description          
+## price               
+## item_seq_number      
+## activation_date      
+## user_type           
+## image                
+## image_top_1          
+## deal_probability    

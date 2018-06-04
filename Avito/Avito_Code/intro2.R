@@ -286,17 +286,6 @@ avi %>% mutate(des_len = str_count(description)) %>%
 
 
 
-# user_id -----------------------------------------------------------------
-length(unique(avi$user_id)) / nrow(avi)
-length(unique(avite$user_id)) / nrow(avi)
-
-avi %>% group_by(user_id) %>% summarise(Count=n()) %>% 
-  arrange(desc(Count)) %>% head(20) %>% 
-  ggplot(aes(x=reorder(user_id, Count), y=Count)) + 
-  geom_col(fill="steelblue") + coord_flip() +
-  labs(x="User ID", y="Count", title = "Most Popular User ID")
-
-
 
 # unname ------------------------------------------------------------------
 glimpse(avi)

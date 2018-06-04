@@ -14,13 +14,17 @@ avi <- read_csv("../input/train.csv")
 avite <- read_csv("../input/test.csv")
 colnames(avi)
 colnames(avite)
+glimpse(avi)
+glimpse(avite)
+summary(avi)
 # datatable(head(avi, 50))
+
 head(avi, 50) %>% datatable(filter = 'top', 
-                            options = list(pageLength = 15, autoWidth = T))
+                            options = list(pageLength = 10, autoWidth = T))
 
 avi_na <- sapply(avi, function(x) sum(is.na(x)))
 avite_na <- sapply(avite, function(x) sum(is.na(x)))
-avi_na[avi_na >0]; avite_na[avi_na >0]
+avi_na[avi_na >0]; avite_na[avite_na >0]
 
 range(avi$deal_probability)
 
@@ -53,12 +57,37 @@ prop.table(table(avite$user_type))
 
 # intro_checkpoint --------------------------------------------------------
 colnames(avi); colnames(avite)
-avi_na[avi_na >0]; avite_na[avi_na >0]
+avi_na[avi_na >0]; avite_na[avite_na >0]
 summary(avi$price)
 summary(avite$price)
 table(avi$user_type)
 range(avi$activation_date)
 range(avite$activation_date)
+# item_id
+sum(unique(avi))
+
+
+
+
+# item_id -----------------------------------------------------------------
+
+
+sum(duplicated(avi$item_id))
+sum(duplicated(avite$item_id))
+length(unique(avi$item_id)) == nrow(avi)
+length(unique(avite$item_id)) == nrow(avite)
+
+# user_id -----------------------------------------------------------------
+length(unique(avi$user_id)) / nrow(avi)
+length(unique(avite$user_id)) / nrow(avi)
+
+avi %>% group_by(user_id) %>% summarise(Count=n()) %>% 
+  arrange(desc(Count)) %>% head(20) %>% 
+  ggplot(aes(x=reorder(user_id, Count), y=Count)) + 
+  geom_col(fill="steelblue") + coord_flip() +
+  labs(x="User ID", y="Count", title = "Most Popular User ID")
+
+
 
 # region ------------------------------------------------------------------
 
