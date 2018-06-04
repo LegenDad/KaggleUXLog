@@ -108,37 +108,134 @@ avi_na[avi_na >0]; avite_na[avite_na >0]
 
 # Variables
 
-## item_id {.tabset}
+## item_id {.tabset .tabset-fade .tabset-pills}
 
 ### train
-```{r message=F, waring=F}
-sum(duplicated(avi$item_id))
-length(unique(avi$item_id)) == nrow(avi)
+```{r echo=TRUE, message=F, waring=F}
+paste("All item_id are unique?", length(unique(avi$item_id)) == nrow(avi))
 ```
 ### test
-```{r message=F, waring=F}
-sum(duplicated(avite$item_id))
-length(unique(avite$item_id)) == nrow(avite)
+```{r echo=TRUE, message=F, waring=F}
+paste("All item_id are unique?", length(unique(avite$item_id)) == nrow(avite))
 ```
 all unique item_id
 
-## user_id
+## user_id {.tabset .tabset-fade .tabset-pills}
 
+### train unique proportion
 ```{r message=F, warning=F}
 length(unique(avi$user_id)) / nrow(avi)
-length(unique(avite$user_id)) / nrow(avi)
+```
 
+### test unique proportion
+```{r message=F, warning=F}
+length(unique(avite$user_id)) / nrow(avi)
+```
+
+### Most popular user_id
+
+```{r message=F, warning=F}
 avi %>% group_by(user_id) %>% summarise(Count=n()) %>% 
   arrange(desc(Count)) %>% head(20) %>% 
   ggplot(aes(x=reorder(user_id, Count), y=Count)) + 
   geom_col(fill="steelblue") + coord_flip() +
   labs(x="User ID", y="Count", title = "Most Popular User ID")
+```
+
+
+## region {.tabset .tabset-fade .tabset-pills}
+
+### train
+```{r, message=F, warning=F}
+region <- c("Краснодарский край","Свердловская область", 
+            "Ростовская область","Татарстан","Челябинская область",
+            "Нижегородская область","Самарская область",
+            "Башкортостан","Пермский край","Новосибирская область",
+            "Ставропольский край","Ханты-Мансийский АО",
+            "Воронежская область","Иркутская область",
+            "Тульская область","Тюменская область","Белгородская область")
+region_en <- c("Krasnodar","Sverdlovsk","Rostov","Tatarstan", 
+               "Chelyabinsk","Nizhny Novgorod","Samara", 
+               "Bashkortostan","Perm","Novosibirsk", 
+               "Stavropol","Khanty-Mansiysk Autonomous Okrug", 
+               "Voronezh","Irkutsk","Tula","Tyumen","Belgorod")
+
+df_regions_en <- as.data.frame(cbind(region,region_en))
+
+avi %>% group_by(region) %>% summarise(Count = n()) %>%
+  arrange(desc(Count)) %>% head(10)  
+
+```
+### most popular region in train
+
+```{r, message=F, warning=F}
+avi %>% group_by(region) %>% summarise(Count = n()) %>%
+  arrange(desc(Count)) %>% head(10) %>% left_join(df_regions_en) %>%
+  mutate(region_en = reorder(region_en, Count)) %>%
+  ggplot(aes(x=region_en, y=Count)) + 
+  geom_col() + coord_flip() + theme_wsj() +
+  geom_text(aes(x=region_en, y = 1, label=paste(round((Count/nrow(avi))*100,2), "%")), 
+            hjust = 0, vjust =.5,  fontface = 'bold', color="orange") + 
+  labs(x='region', y='count', title = 'Most Popular Region')
+```
+
+### most popular region in test
+
+```{r, message=F, warning=F}
+avite %>% group_by(region) %>% summarise(Count = n()) %>%
+  arrange(desc(Count)) %>% head(10) %>% left_join(df_regions_en) %>%
+  mutate(region_en = reorder(region_en, Count)) %>%
+  ggplot(aes(x=region_en, y=Count)) + 
+  geom_col() + coord_flip() + theme_wsj() +
+  geom_text(aes(x=region_en, y = 1, label=paste(round((Count/nrow(avi))*100,2), "%")), 
+            hjust = 0, vjust =.5,  fontface = 'bold', color="orange") + 
+  labs(x='region', y='count', title = 'Most Popular Region')
+
+```
+
+### Distribution of Deal Probablity
+```{r, message=F, warning=F}
+region_dt <- avi %>% group_by(region) %>% summarise(Count = n()) %>% 
+  arrange(desc(Count)) %>% head(10)
+avi %>% filter(region %in% region_dt$region) %>%
+  ggplot(aes(x=factor(region), y=deal_probability, fill= region)) +
+  geom_boxplot() + theme_bw() + 
+  labs(x='Region', y="Deal Probablity", title="Distribution of Deal Probablity") + 
+  theme(axis.text.x = element_text(angle=90, hjust = 1))
+```
+
+## city {.tabset .tabeset-fade .tabset-pills}
+
+### most popular city on Graph
+```{r, message=F, warning=F}
+city <-c("Краснодар","Екатеринбург","Новосибирск","Ростов-на-Дону","Нижний Новгород",
+         "Челябинск","Пермь","Казань","Самара","Омск")
+
+city_en <-c("Krasnodar","Ekaterinburg","Novosibirsk","Rostov-na-Donu",
+            "Nizhny Novgorod", "Chelyabinsk","Permian","Kazan","Samara","Omsk")
+
+df_city_en <- as.data.frame(cbind(city,city_en) )
+
+avi %>% group_by(city) %>% summarise(Count = n()) %>%
+  arrange(desc(Count)) %>% head(10) %>% left_join(df_city_en) %>% 
+  mutate(city_en = reorder(city_en, Count)) %>% 
+  ggplot(aes(x=city_en, y=Count)) + 
+  labs(x='City', y= 'Count', title = 'Most Popular City') + 
+  geom_col() + coord_flip() + theme_wsj()
+
+```
+
+### most popular city on Data
+```{r, message=F, warning=F}
+avi %>% group_by(city) %>% summarise(Count = n()) %>%
+  arrange(desc(Count)) %>% head(10) %>% left_join(df_city_en) %>% datatable()
 
 ```
 
 
-## region              
-## city
+
+
+
 ## parent_category_name 
 ## category_name       
 ## param_1              
