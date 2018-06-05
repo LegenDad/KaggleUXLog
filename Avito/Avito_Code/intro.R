@@ -160,6 +160,28 @@ avi %>% group_by(city) %>% summarise(Count = n()) %>%
   arrange(desc(Count)) %>% head(10) %>% left_join(df_city_en) %>% datatable()
   
 
+# parent category ---------------------------------------------------------
+
+parent_category_name <- c("Личные вещи","Для дома и дачи",
+                          "Бытовая электроника","Недвижимость",
+                          "Хобби и отдых","Транспорт",
+                          "Услуги","Животные","Для бизнеса")
+
+parent_category_name_en <- c("Personal things","home and cottages",
+                             "Consumer electronics","Property",
+                             "Hobbies and Recreation","Transport",
+                             "services","Animals","business")
+
+df_parentcategory_en <- as.data.frame(cbind(parent_category_name,parent_category_name_en ) )
+
+avi %>% group_by(parent_category_name) %>% summarise(Count = n()) %>% 
+  left_join(df_parentcategory_en) %>% arrange(desc(Count)) %>% 
+  ggplot(aes(x=reorder(parent_category_name_en, Count), y=Count)) + 
+  geom_col(fill="lightblue") + coord_flip() + theme_bw() + 
+  labs(x="Parent Category", y="Count", title = "Most Popular Parent Category") + 
+  geom_text(aes(x=parent_category_name_en, y = 5000, label= paste(round(Count*100/nrow(avi),1), "%")  ), 
+            hjust=0, vjust =.5, fontface='bold')
+
 # category ----------------------------------------------------------------
 category_name <- c("Одежда, обувь, аксессуары",
                    "Детская одежда и обувь",
@@ -211,27 +233,6 @@ avi %>% group_by(category_name) %>% summarise(Count = n()) %>%
             hjust = 0, vjust=.5, fontface='bold')
   
 
-# parent category ---------------------------------------------------------
-
-parent_category_name <- c("Личные вещи","Для дома и дачи",
-                          "Бытовая электроника","Недвижимость",
-                          "Хобби и отдых","Транспорт",
-                          "Услуги","Животные","Для бизнеса")
-
-parent_category_name_en <- c("Personal things","home and cottages",
-                             "Consumer electronics","Property",
-                             "Hobbies and Recreation","Transport",
-                             "services","Animals","business")
-
-df_parentcategory_en <- as.data.frame(cbind(parent_category_name,parent_category_name_en ) )
-
-avi %>% group_by(parent_category_name) %>% summarise(Count = n()) %>% 
-  left_join(df_parentcategory_en) %>% arrange(desc(Count)) %>% 
-  ggplot(aes(x=reorder(parent_category_name_en, Count), y=Count)) + 
-  geom_col(fill="lightblue") + coord_flip() + theme_bw() + 
-  labs(x="Parent Category", y="Count", title = "Most Popular Parent Category") + 
-  geom_text(aes(x=parent_category_name_en, y = 5000, label= paste(round(Count*100/nrow(avi),1), "%")  ), 
-            hjust=0, vjust =.5, fontface='bold')
 
 # image_top_1 --------------------------------------------------------------
 range(avi$image_top_1, na.rm=T)
