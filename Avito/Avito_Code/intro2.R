@@ -26,7 +26,7 @@ df_param_1_en <- as.data.frame(cbind(param_1,param_1_en ) )
 
 avi %>% filter(!is.na(param_1)) %>% group_by(param_1) %>% 
   summarise(Count = n()) %>% arrange(desc(Count)) %>% head(10) %>% 
-  left_join(df_param_1_en) %>% kable()
+  left_join(df_param_1_en) %>% datatable()
 
 avi %>% filter(!is.na(param_1)) %>% group_by(param_1) %>% 
   summarise(Count = n()) %>% arrange(desc(Count)) %>% head(10) %>% 
@@ -109,9 +109,21 @@ avi %>% group_by(title) %>% summarise(Count=n()) %>%
                 label = paste(round(Count*100/nrow(avi),1) , "%")), 
             hjust=0, vjust=.5, fontface='bold')
 
-  
 
+# title legnth------------------------------------------------------------
+avi %>% mutate(title_len = str_count(title)) %>% 
+  ggplot(aes(x=title_len)) + geom_histogram(bins = 30, fill='lightblue') +
+  labs(x='Title Length', y='Count', title='train : Distibution of Title Length')
 
+avite %>% mutate(title_len = str_count(title)) %>% 
+  ggplot(aes(x=title_len)) + geom_histogram(bins = 30, fill='lightblue') +
+  labs(x='Title Length', y='Count', title='test : Distibution of Title Length')
+
+# description -------------------------------------------------------------
+
+avi %>% mutate(des_len = str_count(description)) %>% 
+  filter(des_len < 1000) %>% 
+  ggplot(aes(x=des_len)) + geom_histogram(bins=30, fill = 'lightblue')
 
 # image -------------------------------------------------------------------
 avi$image_codeYN <- ifelse(is.na(avi$image), 0, 1)
@@ -268,21 +280,8 @@ avite %>%
 
 
 
-# title legnth------------------------------------------------------------
-avi %>% mutate(title_len = str_count(title)) %>% 
-  ggplot(aes(x=title_len)) + geom_histogram(bins = 30, fill='lightblue') +
-  labs(x='Title Length', y='Count', title='Distibution of Title Length')
-
-avite %>% mutate(title_len = str_count(title)) %>% 
-  ggplot(aes(x=title_len)) + geom_histogram(bins = 30, fill='lightblue') +
-  labs(x='Title Length', y='Count', title='Distibution of Title Length')
 
 
-# description -------------------------------------------------------------
-
-avi %>% mutate(des_len = str_count(description)) %>% 
-  filter(des_len < 1000) %>% 
-  ggplot(aes(x=des_len)) + geom_histogram(bins=30, fill = 'lightblue')
 
 
 

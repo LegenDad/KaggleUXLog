@@ -145,7 +145,8 @@ avi %>% group_by(user_id) %>% summarise(Count=n()) %>%
 
 ## region {.tabset .tabset-fade .tabset-pills}
 
-### train
+### in train
+
 ```{r, message=F, warning=F}
 region <- c("Краснодарский край","Свердловская область", 
             "Ростовская область","Татарстан","Челябинская область",
@@ -163,13 +164,6 @@ region_en <- c("Krasnodar","Sverdlovsk","Rostov","Tatarstan",
 df_regions_en <- as.data.frame(cbind(region,region_en))
 
 avi %>% group_by(region) %>% summarise(Count = n()) %>%
-  arrange(desc(Count)) %>% head(10)  
-
-```
-### most popular region in train
-
-```{r, message=F, warning=F}
-avi %>% group_by(region) %>% summarise(Count = n()) %>%
   arrange(desc(Count)) %>% head(10) %>% left_join(df_regions_en) %>%
   mutate(region_en = reorder(region_en, Count)) %>%
   ggplot(aes(x=region_en, y=Count)) + 
@@ -179,7 +173,7 @@ avi %>% group_by(region) %>% summarise(Count = n()) %>%
   labs(x='region', y='count', title = 'Most Popular Region')
 ```
 
-### most popular region in test
+### in test
 
 ```{r, message=F, warning=F}
 avite %>% group_by(region) %>% summarise(Count = n()) %>%
@@ -236,13 +230,257 @@ avi %>% group_by(city) %>% summarise(Count = n()) %>%
 
 
 
-## parent_category_name 
-## category_name       
-## param_1              
-## param_2              
-## param_3             
-## title                
-## description          
+## parent_category_name {.tabset .tabset-fade .tabset-pills}
+
+### Most popular Parent Category on Graph
+```{r, warning=F, message=F}
+parent_category_name <- c("Личные вещи","Для дома и дачи",
+                          "Бытовая электроника","Недвижимость",
+                          "Хобби и отдых","Транспорт",
+                          "Услуги","Животные","Для бизнеса")
+
+parent_category_name_en <- c("Personal things","home and cottages",
+                             "Consumer electronics","Property",
+                             "Hobbies and Recreation","Transport",
+                             "services","Animals","business")
+
+df_parentcategory_en <- as.data.frame(cbind(parent_category_name,parent_category_name_en ) )
+
+avi %>% group_by(parent_category_name) %>% summarise(Count = n()) %>% 
+  left_join(df_parentcategory_en) %>% arrange(desc(Count)) %>% 
+  ggplot(aes(x=reorder(parent_category_name_en, Count), y=Count)) + 
+  geom_col(fill="lightblue") + coord_flip() + theme_bw() + 
+  labs(x="Parent Category", y="Count", title = "Most Popular Parent Category") + 
+  geom_text(aes(x=parent_category_name_en, y = 5000, 
+                label= paste(round(Count*100/nrow(avi),1), "%")  ), 
+            hjust=0, vjust =.5, fontface='bold')
+
+```
+
+### Most popular Parent Category on Data
+
+```{r, message=F, warning=F}
+avi %>% group_by(parent_category_name) %>% summarise(Count = n()) %>% 
+  left_join(df_parentcategory_en) %>% arrange(desc(Count)) %>% datatable()
+```
+
+## category_name {.tabset .tabset-fade .tabset-pills}
+
+
+### Most Popular Category on Graph
+```{r, message=F, warning=F}
+category_name <- c("Одежда, обувь, аксессуары",
+                   "Детская одежда и обувь",
+                   "Товары для детей и игрушки",
+                   "Квартиры",
+                   "Телефоны",
+                   "Мебель и интерьер",
+                   "Предложение услуг",
+                   "Автомобили",
+                   "Ремонт и строительство",
+                   "Бытовая техника",
+                   "Недвижимость за рубежом",
+                   "Дома, дачи, коттеджи",
+                   "Земельные участки",
+                   "Комнаты",
+                   "Грузовики и спецтехника",
+                   "Готовый бизнес",
+                   "Гаражи и машиноместа",
+                   "Коммерческая недвижимость")
+
+category_name_en <- c("Clothes,shoes accessories" , 
+                      "Children's clothing and footwear" ,
+                      "Goods for children and toys" , 
+                      "Apartments" , 
+                      "Phones",
+                      "Furniture and interior",
+                      "Offer of services",
+                      "Cars",
+                      "Repair and construction",
+                      "Appliances",
+                      "Property Abroad", 
+                      "Houses, cottages, cottages",
+                      "Land",
+                      "Rooms",
+                      "Trucks and special equipment",
+                      "Ready business", 
+                      "Garages and parking places",
+                      "Commercial Property")
+
+df_category_en <- as.data.frame(cbind(category_name,category_name_en ) )
+
+avi %>% group_by(category_name) %>% summarise(Count = n()) %>%
+  arrange(desc(Count)) %>% head(10) %>% left_join(df_category_en) %>% 
+  ggplot(aes(x=reorder(category_name_en, Count), y=Count)) + 
+  geom_col(fill = "lightblue") + coord_flip() + theme_bw() + 
+  labs(x='Category', y='Count', title='Most Popular Category') + 
+  geom_text(aes(x=category_name_en, y= 5000, 
+                label= paste(round(Count*100/nrow(avi),1), "%")), 
+            hjust = 0, vjust=.5, fontface='bold')
+
+```
+
+### Most Popular Category on Data
+```{r, message=F, warning=F}
+avi %>% group_by(category_name) %>% summarise(Count = n()) %>%
+  arrange(desc(Count)) %>% head(10) %>% left_join(df_category_en) %>% datatable()
+```
+
+
+## param_1  {.tabset .tabset-fade .tabset-pills} 
+
+### Most Popular param_1 on Graph
+```{r, message=F, warning=F}
+param_1 <- c("Женская одежда","Для девочек","Для мальчиков",
+             "Продам","С пробегом","Аксессуары",
+             "Мужская одежда","Другое",
+             "Игрушки","Детские коляски")
+
+param_1_en <- c("Women's clothing","For girls","For boys",
+                "Selling","With mileage","Accessories","Men's clothing","Other",
+                "Toys","Baby carriages")
+
+df_param_1_en <- as.data.frame(cbind(param_1,param_1_en ) )
+
+avi %>% filter(!is.na(param_1)) %>% group_by(param_1) %>% 
+  summarise(Count = n()) %>% arrange(desc(Count)) %>% head(10) %>% 
+  left_join(df_param_1_en) %>% 
+  ggplot(aes(x = reorder(param_1_en, Count), y= Count)) + 
+  geom_col(fill='lightblue') + coord_flip() + theme_bw() + 
+  labs(x = 'Param_1', y = 'Count', title = 'Most Poupular Param 1') + 
+  geom_text(aes(x=param_1_en, y = 10000, 
+                label = paste(round(Count*100/nrow(avi),1), "%")), 
+            hjust=0, vjust=.5, fontface='bold')
+
+```
+
+
+### Most Popular param_1 on DT
+```{r, message=F, warning=F}
+avi %>% filter(!is.na(param_1)) %>% group_by(param_1) %>% 
+  summarise(Count = n()) %>% arrange(desc(Count)) %>% head(10) %>% 
+  left_join(df_param_1_en) %>% datatable()
+```
+
+
+## param_2  {.tabset .tabset-fade .tabset-pills}
+
+### Most Popular param_2 on Graph
+```{r, message=F, warning=F}
+param_2 <- c("Обувь","Верхняя одежда",
+             "Платья и юбки","Другое",
+             "Трикотаж","Брюки",
+             "1","2","На длительный срок","Дом")
+
+param_2_en <- c("Footwear","Outerwear","Dresses and skirts","Other",
+                "Knitwear","Pants","1","2","For a long time","House")
+
+df_param_2_en <- as.data.frame(cbind(param_2,param_2_en ) )
+
+avi %>% filter(!is.na(param_2)) %>% group_by(param_2) %>% 
+  summarise(Count = n()) %>% arrange(desc(Count)) %>% head(10) %>% 
+  left_join(df_param_2_en) %>% 
+  ggplot(aes(x=reorder(param_2_en, Count), y = Count)) + 
+  geom_col(fill='lightblue') + coord_flip() + theme_bw() + 
+  labs(x='Param_2', y='Count', title='Most Popular Param 2') + 
+  geom_text(aes(x=param_2_en, y=10000, 
+                label = paste(round(Count*100/nrow(avi),1), "%")), 
+            hjust = 0, vjust=.5, fontface = 'bold')
+
+```
+
+### Most Popular param_2 on DT
+```{r, message=F, warning=F}
+avi %>% filter(!is.na(param_2)) %>% group_by(param_2) %>% 
+  summarise(Count = n()) %>% arrange(desc(Count)) %>% head(10) %>% 
+  left_join(df_param_2_en) %>% datatable()
+
+```
+
+## param_3  {.tabset .tabset-fade .tabset-pills}           
+
+### Most Popular param_3 on Graph
+```{r, message=F, warning=F}
+avi %>% filter(!is.na(param_3)) %>% group_by(param_3) %>% 
+  summarise(Count = n()) %>% arrange(desc(Count)) %>% head(10) %>%
+  ggplot(aes(x=reorder(param_3, Count), y=Count)) + 
+  geom_col(fill='lightblue') + coord_flip() + theme_bw() + 
+  labs(x='Param 3', y='Count', title='Most Popular Param 3') + 
+  geom_text(aes(x=param_3, y=5000, 
+                label = paste(round(Count*100/nrow(avi),1) , "%")), 
+            hjust=0, vjust=.5, fontface='bold')
+
+```
+
+
+### Most Popular param_3 on DT
+
+```{r, message=F, warning=F}
+avi %>% filter(!is.na(param_3)) %>% group_by(param_3) %>% 
+  summarise(Count = n()) %>% arrange(desc(Count)) %>% head(10) %>% datatable()
+```
+
+
+
+## title {.tabset .tabset-fade .tabset-pills}
+
+Memory Limits Problem on 8GB
+
+![](https://www.kaggleusercontent.com/kf/3900385/eyJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0..oN-egdiVpXdr4Qt9BGHiTA.ytsK5O0HblEcIRvg4OKr88SjKH6UqQchWnShY83Bo9IE_xOomOwM9TOuJ2cUa7ghDmU8-4ukG4-wzhTDQWAzFLoTkCJEJeYJie0cQlgvbvOxLEUSK5VjUP-IZ7DjvTph.ZfjzS56_zL-xkbgVqV9KIA/__results___files/figure-html/unnamed-chunk-3-1.png)
+
+### Most Popular Title on Graph
+```{r eval=FALSE, message=F, warning=F}
+title <- c("Платье","Туфли","Куртка",
+           "Пальто","Джинсы","Комбинезон",
+           "Кроссовки","Костюм","Ботинки",
+           "Босоножки")
+
+title_en <- c("Dress","Shoes","Jacket",
+              "Coat","Jeans","Overalls",
+              "Sneakers","Costume","Boots",
+              "Sandals")
+
+df_title_en <- as.data.frame(cbind(title,title_en) )
+
+avi %>% group_by(title) %>% summarise(Count=n()) %>%
+  arrange(desc(Count)) %>% head(10) %>% left_join(df_title_en) %>% 
+  ggplot(aes(x=reorder(title_en, Count), y=Count)) + 
+  geom_col(fill='lightblue') + coord_flip() + theme_bw() + 
+  labs(x='Title', y='Count', title='Most Popular Title') + 
+  geom_text(aes(x=title_en, y=2000, 
+                label = paste(round(Count*100/nrow(avi),1) , "%")), 
+            hjust=0, vjust=.5, fontface='bold')
+
+```
+
+### Most Popular Title on DT
+```{r, eval=FALSE, message=F, warning=F}
+avi %>% group_by(title) %>% summarise(Count=n()) %>%
+  arrange(desc(Count)) %>% head(10) %>% left_join(df_title_en) %>% kable()
+```
+
+### Title Length
+```{r, message=F, warning=F}
+avi %>% mutate(title_len = str_count(title)) %>% 
+  ggplot(aes(x=title_len)) + geom_histogram(bins = 30, fill='lightblue') +
+  labs(x='Title Length', y='Count', title='train : Distibution of Title Length')
+
+avite %>% mutate(title_len = str_count(title)) %>% 
+  ggplot(aes(x=title_len)) + geom_histogram(bins = 30, fill='lightblue') +
+  labs(x='Title Length', y='Count', title='test : Distibution of Title Length')
+```
+
+
+
+## description 
+
+```{r}
+avi %>% mutate(des_len = str_count(description)) %>% 
+  filter(des_len < 1000) %>% 
+  ggplot(aes(x=des_len)) + geom_histogram(bins=30, fill = 'lightblue')
+```
+
+
 ## price               
 ## item_seq_number      
 ## activation_date      
