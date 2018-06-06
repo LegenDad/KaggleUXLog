@@ -56,6 +56,7 @@ library(knitr)
 library(skimr)
 library(DT)
 library(ggthemes)
+library(lubridate)
 ```
 ## Importing Data
 ```{r message=F, waring=F}
@@ -491,10 +492,193 @@ avi %>% mutate(des_len = str_count(description)) %>%
 ```
 
 
-## price               
-## item_seq_number      
-## activation_date      
-## user_type           
-## image                
-## image_top_1          
-## deal_probability    
+## price {.tabset .tabset-fade .tabset-pills}
+
+### Basic & Log
+
+```{r warning=F, message=F}
+avi %>% filter(!is.na(price)) %>% ggplot(aes(x=price)) + geom_histogram(bins=50)
+
+avi %>% filter(!is.na(price)) %>% ggplot(aes(x=price)) + 
+  geom_histogram(bins=50, fill = 'steelblue')  + 
+  labs(title="Price Log Graph") + 
+  scale_x_log10() + scale_y_log10() + theme_wsj()
+
+```
+
+### with UserType
+
+```{r warning=F, message=F}
+avi %>% filter(!is.na(price)) %>% ggplot(aes(x=price, fill=user_type)) + 
+  geom_histogram(bins=50)  + 
+  labs(x='price', y='count', title="Price Log Graph") + 
+  scale_x_log10() + scale_y_log10() + theme_wsj()
+
+```
+
+### with Parent Category
+
+```{r warning=F, message=F}
+avi %>% filter(!is.na(price)) %>% left_join(df_parentcategory_en) %>% 
+  ggplot(aes(x=price, fill=parent_category_name_en)) + 
+  geom_histogram(bins=50)  + 
+  labs(x='price', y='count', title="Price Log Graph") + 
+  scale_x_log10() + scale_y_log10() + theme_wsj()
+
+```
+
+## item_seq_number {.tabset .tabset-fade .tabset-pills}
+
+### Basic & Log
+
+```{r, warning=F, message=F}
+avi %>% ggplot(aes(x=item_seq_number)) + geom_histogram(bins = 30)
+avi %>% ggplot(aes(x=item_seq_number)) + 
+  geom_histogram(bins = 30) + scale_x_log10()
+```
+
+### with User Type
+
+```{r, warning=F, message=F}
+avi %>% ggplot(aes(x=item_seq_number, fill=user_type)) + 
+  geom_histogram(bins = 30) + scale_x_log10()
+
+```
+
+
+
+
+## activation_date {.tabset .tabset-fade .tabset-pills}
+
+### Graph
+```{r, warning=F, message=F}
+avi %>% mutate(day = day(activation_date)) %>% group_by(day) %>% 
+  summarise(Count = n()) %>% 
+  ggplot(aes(x=day, y=Count)) + geom_col()
+```
+
+### train DT
+```{r, warning=F, message=F}
+avi %>% mutate(day = day(activation_date)) %>% group_by(day) %>% 
+  summarise(Count = n()) %>% 
+  datatable(filter = "top", options = list(pageLength = 30, autoWidth= T))
+```
+### test DT
+```{r, warning=F, message=F}
+avite %>% mutate(day = day(activation_date)) %>% group_by(day) %>% 
+  summarise(Count = n()) %>% 
+  datatable(filter = "top", options = list(pageLength = 30, autoWidth= T))
+```
+
+### weekday
+```{r, warning=F, message=F}
+avi %>% mutate(wday = wday(activation_date, labe=T, locale="UK")) %>% 
+  group_by(wday) %>% summarise(Count=n()) %>%
+  ggplot(aes(x=wday, y=Count)) + 
+  geom_col(fill='lightblue', col='white') + theme_bw() + 
+  labs(x="Activation Weekday", y="Count", title="Activation Weekday")
+```
+
+
+## user_type {.tabset .tabset-fade .tabset-pills}
+
+### on train
+```{r, message=F, warning=F}
+avi %>% group_by(user_type) %>% summarise(Count = n()) %>%
+  ggplot(aes(x=user_type, y=Count)) + 
+  geom_col(color='orange', fill = 'lightblue') + 
+  labs(x='User Type', y='Count', title = 'User Type') + 
+  geom_text(aes(x=user_type, y= 50000, 
+                label = paste(round(Count*100/nrow(avi)), "%")), 
+            size = 5, fontface='bold')
+
+```
+
+### on test
+```{r, message=F, warning=F}
+avite %>% group_by(user_type) %>% summarise(Count = n()) %>%
+  ggplot(aes(x=user_type, y=Count)) + 
+  geom_col(color='orange', fill = 'lightblue') + 
+  labs(x='User Type', y='Count', title = 'User Type') + 
+  geom_text(aes(x=user_type, y= 15000, 
+                label = paste(round(Count*100/nrow(avite)), "%")), 
+            size = 5, fontface='bold')
+
+```
+
+
+
+## image {.tabset .tabset-fade .tabset-pills}
+
+### image on train
+```{r, message=F, warning=F}
+avi$image_codeYN <- ifelse(is.na(avi$image), 0, 1)
+
+avi %>% group_by(image_codeYN) %>% summarise(Count = n()) %>% 
+  ggplot(aes(x=factor(image_codeYN), y=Count)) + 
+  geom_col(fill='lightblue') + theme_wsj() + 
+  labs(x="image_codeYN", y="Count", title="Image Code Y/N Count") + 
+  geom_text(aes(x=factor(image_codeYN), y=500000, 
+                label= paste0(Count, "\n\n\n", 
+                              round(Count*100/nrow(avi),1), "%")))
+
+```
+
+### image on test
+```{r, message=F, warning=F}
+avite$image_codeYN <- ifelse(is.na(avite$image), 0, 1)
+avite %>% group_by(image_codeYN) %>% summarise(Count = n()) %>% 
+  ggplot(aes(x=factor(image_codeYN), y=Count)) + 
+  geom_col(fill='lightblue') + theme_wsj() + 
+  labs(x="image_codeYN", y="Count", title="Image Code Y/N Count") + 
+  geom_text(aes(x=factor(image_codeYN), y=100000, 
+                label= paste0(Count, "\n\n\n", 
+                              round(Count*100/nrow(avi),1), "%")))
+
+```
+
+### with Deal Probability 
+
+```{r, message=F, warning=F}
+ggplot(data=avi, aes(x=factor(image_codeYN), y=deal_probability)) +
+  geom_boxplot(fill=c("lightgreen", "lightblue")) + theme_wsj() + 
+  labs(x="image_codeYN", y="Deal Probability", 
+       title = "Distribution of Deal Probability on ImageCode")
+```
+
+
+
+## image_top_1   
+```{r, warning=F, message=F}
+ggplot(avi, aes(x=image_top_1)) + geom_histogram(bins = 30)
+
+```
+
+## deal_probability {.tabset .tabset-fade .tabset-pills}
+
+### bin 30 
+```{r, warning=F, message=F}
+avi %>% ggplot(aes(x=deal_probability)) + 
+  geom_histogram(bins=30, fill = 'lightblue') + theme_wsj() + 
+  labs(x="Deal Probability", y= "Count", title = "Distribution of Deal Probability")
+```
+
+### bin 10 
+```{r, warning=F, message=F}
+avi %>% ggplot(aes(x=deal_probability)) + 
+  geom_histogram(bins=10, fill = 'lightblue') + theme_wsj() + 
+  labs(x="Deal Probability", y= "Count", title = "Distribution of Deal Probability")
+```
+
+### bin 5 
+```{r, warning=F, message=F}
+avi %>% ggplot(aes(x=deal_probability)) + 
+  geom_histogram(bins=5, fill = 'lightblue') + theme_wsj() + 
+  labs(x="Deal Probability", y= "Count", title = "Distribution of Deal Probability")
+```
+
+
+
+
+
+
