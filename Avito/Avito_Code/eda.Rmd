@@ -108,6 +108,10 @@ avi_na[avi_na >0]; avite_na[avite_na >0]
 
 # Variables
 
+```{r message=F, warning=F}
+skim(avi) %>% kable()
+```
+
 ## item_id {.tabset .tabset-fade .tabset-pills}
 
 ### train
@@ -424,9 +428,9 @@ avi %>% filter(!is.na(param_3)) %>% group_by(param_3) %>%
 
 ## title {.tabset .tabset-fade .tabset-pills}
 
-Memory Limits Problem on 8GB
+Memory Limits Problem on Windows
 
-![](https://www.kaggleusercontent.com/kf/3900385/eyJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0..oN-egdiVpXdr4Qt9BGHiTA.ytsK5O0HblEcIRvg4OKr88SjKH6UqQchWnShY83Bo9IE_xOomOwM9TOuJ2cUa7ghDmU8-4ukG4-wzhTDQWAzFLoTkCJEJeYJie0cQlgvbvOxLEUSK5VjUP-IZ7DjvTph.ZfjzS56_zL-xkbgVqV9KIA/__results___files/figure-html/unnamed-chunk-3-1.png)
+![](../output/title.png)
 
 ### Most Popular Title on Graph
 ```{r eval=FALSE, message=F, warning=F}
