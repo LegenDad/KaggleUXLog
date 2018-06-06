@@ -1,7 +1,7 @@
 ---
 title: "EDA Avito"
 author: "LegenDad"
-date: "2018-06-04"
+date: "2018-06-06"
 output: 
   html_document:
     toc : true
@@ -438,10 +438,8 @@ avi %>% filter(!is.na(param_3)) %>% group_by(param_3) %>%
 
 Memory Limits Problem on Windows
 
-![](https://raw.githubusercontent.com/LegenDad/KaggleUXLog/master/Avito/output/title.png)
-
 ### Most Popular Title on Graph
-```{r eval=FALSE, message=F, warning=F}
+```{r eval=T, message=F, warning=F}
 title <- c("Платье","Туфли","Куртка",
            "Пальто","Джинсы","Комбинезон",
            "Кроссовки","Костюм","Ботинки",
@@ -466,7 +464,7 @@ avi %>% group_by(title) %>% summarise(Count=n()) %>%
 ```
 
 ### Most Popular Title on DT
-```{r, eval=FALSE, message=F, warning=F}
+```{r, eval=T, message=F, warning=F}
 avi %>% group_by(title) %>% summarise(Count=n()) %>%
   arrange(desc(Count)) %>% head(10) %>% left_join(df_title_en) %>% kable()
 ```
