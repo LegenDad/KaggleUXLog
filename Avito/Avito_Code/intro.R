@@ -182,6 +182,14 @@ avi %>% group_by(parent_category_name) %>% summarise(Count = n()) %>%
   geom_text(aes(x=parent_category_name_en, y = 5000, label= paste(round(Count*100/nrow(avi),1), "%")  ), 
             hjust=0, vjust =.5, fontface='bold')
 
+avi %>% group_by(parent_category_name) %>% summarise(Count = n()) %>% 
+  left_join(df_parentcategory_en) %>% arrange(desc(Count)) %>% 
+  ggplot(aes(x=reorder(parent_category_name_en, Count), y=Count)) + 
+  geom_col(fill="lightblue") + coord_flip() + theme_bw() + 
+  labs(x="Parent Category", y="Count", title = "Most Popular Parent Category") + 
+  geom_text(aes(x=parent_category_name_en, y = 5000, label= paste(round(Count*100/nrow(avi),1), "%")  ), 
+            hjust=0, vjust =.5, fontface='bold') +scale_y_log10()
+
 # category ----------------------------------------------------------------
 category_name <- c("Одежда, обувь, аксессуары",
                    "Детская одежда и обувь",
