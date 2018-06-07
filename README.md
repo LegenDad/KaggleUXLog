@@ -3,9 +3,11 @@
 
 ---
 
+### Avito Demand Prediction Challenge
 
+[EDA](Avito/Avito_Code/EDA.html)
 
-
+---
 ### TalkingData AdTracking Fraud Detection Challenge
 
 ![](AdT/output/scoregraph.png)
