@@ -28,9 +28,12 @@ table(avi$p1_na)
 table(avi$p2_na)
 table(avi$p3_na)
 str(avi$param_1)
+head(sort(table(avi$param_1), decreasing = T), 7)
 avi <- avi %>% mutate(param_1 = param_1 %>% factor() %>% as.integer(), 
-                      param_2 = param_2 %>% factor() %>% as.integer(), 
+                      param_2 = as.integer(factor(param_2)), 
                       param_3 = as.integer(factor(param_3)))
+head(sort(table(avi$param_3), decreasing = T), 7)
+sort(table(avi$param_3), decreasing = T)
 
 # avi$param_1 <- ifelse(is.na(avi$param_1), -1, avi$param_1)
 avi <- avi %>% replace_na(list(param_1 = -1, param_2 = -1, param_3 =-1))
@@ -47,10 +50,10 @@ range(avi$param_3)
 pie(table(avi$param_1))
 pie(table(avi$param_2))
 pie(table(avi$param_3))
+
 head(sort(table(avi$param_3), decreasing = T), 300)
 head(sort(table(avi$param_3), decreasing = T), 250)
 1503424 * 0.00005
-pie(fct_lump(table(avi$param_3)))
 
 ?fct_lump
 
