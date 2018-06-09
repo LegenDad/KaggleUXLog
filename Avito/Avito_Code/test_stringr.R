@@ -24,8 +24,15 @@ fruit <- c("apple", "banana", "pear", "pineapple")
 str_count(fruit, "a")
 str_count(fruit, "p")
 str_count(fruit, "e")
+
+str_detect(fruit, "a")
+str_detect(fruit, c("a", "b", "p", "p"))
+
 str_count(fruit, c("a", "b", "p", "p"))
-str_count(fruit, c("a", "p"))
+
+
+
+str_count(fruit, c("a", "b"))
 
 str_count(c("a.", "...", ".a.a"), ".")
 str_count(c("a.", "...", ".a.a"), fixed("."))
