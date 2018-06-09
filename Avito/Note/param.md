@@ -46,3 +46,5 @@ pie(table(avi$param_1))
 pie(table(avi$param_2))
 pie(table(avi$param_3))
 ```
+
+* param_3 분포가 극단적이어서 , fct_lump 활용
