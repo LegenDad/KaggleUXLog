@@ -63,7 +63,7 @@ avi <- avi %>% mutate(param_1 = param_1 %>% factor() %>% as.integer(),
                       param_2 = param_2 %>% factor() %>% as.integer(), 
                       param_3 = param_3 %>% factor() %>% 
                         fct_lump(prop = 0.00005) %>% as.integer())
-avi <- avi %>% replace_na(list(param_1 = -1, param_2 = -1, param_3 =-1))
+avi <- avi %>% replace_na(list(param_1 = 0, param_2 = 0, param_3 = 0))
 nrow(avi[avi$param_1 ==-1, ]) == sum(avi$p1_na)
 nrow(avi[avi$param_2 ==-1, ]) == sum(avi$p2_na)
 nrow(avi[avi$param_3 ==-1, ]) == sum(avi$p3_na)
@@ -73,7 +73,7 @@ avi_na2[avi_na2>0]
 pie(table(avi$param_1))
 pie(table(avi$param_2))
 pie(table(avi$param_3))
-
+avi %>% select(param_1:param_3) %>% skim()
 
 
 # dsc ---------------------------------------------------------------------
@@ -96,22 +96,48 @@ range(avi$dsc_cap)
 range(avi$dsc_capE)
 range(avi$dsc_capR)
 avi$dsc_pun = str_count(avi$description, "[[:punct:]]")
+range(avi$dsc_pun, na.rm = T)
 avi$dsc_dig = str_count(avi$description, "[[:digit:]]")
+range(avi$dsc_dig, na.rm = T)
 avi <- avi %>% replace_na(list(dsc_pun=0, dsc_dig=0))
+range(avi$dsc_pun)
+table(avi$dsc_pun)
+avi %>% select(dsc_na:dsc_dig) %>% skim()
+pie(table(avi$dsc_len))
+boxplot(avi$dsc_len)
+pie(table(avi$dsc_na))
+pie(table(avi$dsc_cap))
+pie(table(avi$dsc_capE))
+pie(table(avi$dsc_capR))
+pie(table(avi$dsc_dig))
+pie(table(avi$dsc_pun))
 
 # price -------------------------------------------------------------------
-range(avi$price)
+
+# dsc_na, price_na, img_na, img_t1_na
+# test; dsc_na X
+
+# log x , log(1+x)  google seach graph check
+
 range(avi$price, na.rm=T)
 # avi$price <- log(avi$price)
 avi$price <-log1p(avi$price)
-avi <- avi %>% replace_na(list(price = -1))
+avi <- avi %>% replace_na(list(price = -1))  # -1 or 0 check
+skim(avi$price)
+head(table(avi$price))
 
 # img ---------------------------------------------------------------------
 
+# dsc_na, price_na, img_na, img_t1_na
+# test; dsc_na X
+
+
 avi$img_na <- is.na(avi$image) %>% as.integer()
-table(avi$dsc_na)
+
 table(avi$img_na)
 range(avi$image_top_1, na.rm = T)
+
+avi <- avi %>% replace_na(list(image_top_1 = -1))
 
 # library(magrittr)
 # library(text2vec)
