@@ -134,10 +134,47 @@ head(table(avi$price))
 
 avi$img_na <- is.na(avi$image) %>% as.integer()
 
-table(avi$img_na)
 range(avi$image_top_1, na.rm = T)
 
 avi <- avi %>% replace_na(list(image_top_1 = -1))
+table(avi$image_top_1)
+length(unique(avi$image_top_1))
+
+
+
+
+# user_id ------------------------------------------------------------------
+
+# [1] "item_id"              "user_id"              "region"              
+# [4] "city"                 "parent_category_name" "category_name"       
+# [7] "param_1"              "param_2"              "param_3"             
+# [10] "title"                "description"          "price"               
+# [13] "item_seq_number"      "activation_date"      "user_type"           
+# [16] "image"                "image_top_1"          "deal_probability"    
+
+length(unique(avi$user_id))
+771769 / 150324
+sort(table(avi$user_id), decreasing = T)
+avi %>% add_count(user_id) %>% group_by(n) %>% summarise(count= n())
+
+150324 * 0.00002
+
+avi <- avi %>% mutate(user_id = factor(user_id) %>% 
+  fct_lump(prop = 0.00002) %>% as.integer())
+
+range(avi$user_id)
+
+
+
+# region ------------------------------------------------------------------
+
+
+# [1] "item_id"              "user_id"              "region"              
+# [4] "city"                 "parent_category_name" "category_name"       
+# [7] "param_1"              "param_2"              "param_3"             
+# [10] "title"                "description"          "price"               
+# [13] "item_seq_number"      "activation_date"      "user_type"           
+# [16] "image"                "image_top_1"          "deal_probability"    
 
 # library(magrittr)
 # library(text2vec)
@@ -161,7 +198,6 @@ avi <- avi %>% replace_na(list(image_top_1 = -1))
 #          parent_category_name = factor(parent_category_name) %>% as.integer(), 
 #          region = factor(region) %>% as.integer(),
 #          city =  factor(city) %>% fct_lump(prop = 0.0003) %>% as.integer(),
-#          user_id = factor(user_id) %>% fct_lump(prop = 0.000025) %>% as.integer(),
 #          txt = paste(title, description, sep = " "),
 #          mday = mday(activation_date),
 #          wday = wday(activation_date)) %>% 
