@@ -74,7 +74,7 @@ pie(table(avi$param_1))
 pie(table(avi$param_2))
 pie(table(avi$param_3))
 avi %>% select(param_1:param_3) %>% skim()
-
+avi %>% select(contains("param")) %>% skim()
 
 # dsc ---------------------------------------------------------------------
 
@@ -91,7 +91,7 @@ avi$dsc_capR = str_count(avi$description, "[А-Я]")
 range(avi$dsc_capR, na.rm = T)
 avi$dsc_cap = str_count(avi$description, "[A-ZА-Я]")
 range(avi$dsc_cap, na.rm=T)
-avi <- avi %>% replace_na(list(dsc_capE=0, dsc_capR=0, dsc_cap=0))
+avi <- avi %>% replace_na(list(dsc_len =0 , dsc_capE=0, dsc_capR=0, dsc_cap=0))
 range(avi$dsc_cap)
 range(avi$dsc_capE)
 range(avi$dsc_capR)
@@ -102,7 +102,7 @@ range(avi$dsc_dig, na.rm = T)
 avi <- avi %>% replace_na(list(dsc_pun=0, dsc_dig=0))
 range(avi$dsc_pun)
 table(avi$dsc_pun)
-avi %>% select(dsc_na:dsc_dig) %>% skim()
+avi %>% select(contains("dsc")) %>% skim()
 pie(table(avi$dsc_len))
 boxplot(avi$dsc_len)
 pie(table(avi$dsc_na))
@@ -140,7 +140,7 @@ avi <- avi %>% replace_na(list(image_top_1 = -1))
 table(avi$image_top_1)
 length(unique(avi$image_top_1))
 
-
+avi_na3 <- sapply(avi, function (x) sum(is.na(x)))
 
 
 # user_id ------------------------------------------------------------------
@@ -154,19 +154,86 @@ length(unique(avi$image_top_1))
 
 length(unique(avi$user_id))
 771769 / 150324
-sort(table(avi$user_id), decreasing = T)
-avi %>% add_count(user_id) %>% group_by(n) %>% summarise(count= n())
 
+avi %>% add_count(user_id) %>% group_by(n) %>% summarise(count= n())
+sqrt(237)
 150324 * 0.00002
 
+avi %>% add_count(user_id) %>% summarise(count = n_distinct(n))
+
 avi <- avi %>% mutate(user_id = factor(user_id) %>% 
-  fct_lump(prop = 0.00002) %>% as.integer())
+                        fct_lump(prop = 0.00002) %>% as.integer())
 
+avi %>% group_by(user_id) %>% summarise(count = n()) %>% arrange(desc(count))
 range(avi$user_id)
-
+table(avi$user_id)
 
 
 # region ------------------------------------------------------------------
+avi %>% group_by(region) %>% summarise(count=n())
+pie(table(avi$region))
+
+avi <- avi %>% mutate(region = factor(region) %>% as.integer())
+
+
+# city --------------------------------------------------------------------
+
+avi %>% group_by(city) %>% summarise(count=n()) %>% arrange(desc(count))
+avi %>% group_by(city) %>% summarise(count=n()) %>% arrange(desc(count)) %>% datatable()
+1503424 * 0.0003
+
+avi <- avi %>% mutate(city = factor(city) %>% fct_lump(prop = 0.0003) %>% as.integer())
+
+
+
+# parent_category_name ----------------------------------------------------
+
+avi %>% group_by(parent_category_name) %>% summarise(count=n())
+
+avi <- avi %>% mutate(parent_category_name = factor(parent_category_name) %>%  as.integer())
+
+
+# category_name -----------------------------------------------------------
+
+avi %>% group_by(category_name) %>% summarise(count=n())
+
+avi <- avi %>% mutate(category_name = factor(category_name) %>% as.integer())
+
+
+# param_1,2,3 -------------------------------------------------------------
+
+# p1, p2, p3 retry 
+
+
+# title -------------------------------------------------------------------
+
+avi %>% select(contains("dsc")) %>% colnames()
+# "dsc_na"   "dsc_len"  "dsc_capE" "dsc_capR" "dsc_cap"  "dsc_pun"  "dsc_dig" 
+
+avi <- avi %>% mutate(title_len = str_length(title), 
+                      title_capE = str_count(title, "[A-Z]"), 
+                      title_capR = str_count(title, "[А-Я]"),
+                      title_cap = str_count(title, "[A-ZА-Я]"),
+                      title_pun = str_count(title, "[[:punct:]]"), 
+                      title_dig = str_count(title, "[[:digit:]]")
+                      )
+
+
+avi %>% select(contains("title")) %>% skim()
+
+
+# description, price -------------------------------------------------------------
+
+# dsc, price section
+
+
+# item_seq_number ---------------------------------------------------------
+
+glimpse(avi$item_seq_number)
+avi %>% group_by(item_seq_number) %>% summarise(cnt = n()) %>% arrange(desc(cnt))
+
+# activation_date ---------------------------------------------------------
+
 
 
 # [1] "item_id"              "user_id"              "region"              
@@ -175,6 +242,11 @@ range(avi$user_id)
 # [10] "title"                "description"          "price"               
 # [13] "item_seq_number"      "activation_date"      "user_type"           
 # [16] "image"                "image_top_1"          "deal_probability"    
+
+
+
+
+
 
 # library(magrittr)
 # library(text2vec)
@@ -187,17 +259,7 @@ range(avi$user_id)
 # library(forcats)
 
 #   mutate(no_img = is.na(image) %>% as.integer(),
-#          titl_len = str_length(title),
-#          titl_capE = str_count(title, "[A-Z]"),
-#          titl_capR = str_count(title, "[А-Я]"),
-#          titl_cap = str_count(title, "[A-ZА-Я]"),
-#          titl_pun = str_count(title, "[[:punct:]]"),
-#          titl_dig = str_count(title, "[[:digit:]]"),
 #          user_type = factor(user_type),
-#          category_name = factor(category_name) %>% as.integer(),
-#          parent_category_name = factor(parent_category_name) %>% as.integer(), 
-#          region = factor(region) %>% as.integer(),
-#          city =  factor(city) %>% fct_lump(prop = 0.0003) %>% as.integer(),
 #          txt = paste(title, description, sep = " "),
 #          mday = mday(activation_date),
 #          wday = wday(activation_date)) %>% 
