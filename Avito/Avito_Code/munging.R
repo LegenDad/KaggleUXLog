@@ -5,6 +5,7 @@ library(tidyverse)
 library(knitr)
 library(skimr)
 library(DT)
+library(lubridate)
 avi <- read_csv("../input/train.csv")
 # avtte <- read_csv("../input/test.csv")
 
@@ -182,7 +183,8 @@ avi %>% group_by(city) %>% summarise(count=n()) %>% arrange(desc(count))
 avi %>% group_by(city) %>% summarise(count=n()) %>% arrange(desc(count)) %>% datatable()
 1503424 * 0.0003
 
-avi <- avi %>% mutate(city = factor(city) %>% fct_lump(prop = 0.0003) %>% as.integer())
+avi <- avi %>% mutate(city = factor(city) %>% 
+                        fct_lump(prop = 0.0003) %>% as.integer())
 
 
 
@@ -190,7 +192,8 @@ avi <- avi %>% mutate(city = factor(city) %>% fct_lump(prop = 0.0003) %>% as.int
 
 avi %>% group_by(parent_category_name) %>% summarise(count=n())
 
-avi <- avi %>% mutate(parent_category_name = factor(parent_category_name) %>%  as.integer())
+avi <- avi %>% mutate(parent_category_name = factor(parent_category_name) %>% 
+                        as.integer())
 
 
 # category_name -----------------------------------------------------------
@@ -234,6 +237,54 @@ avi %>% group_by(item_seq_number) %>% summarise(cnt = n()) %>% arrange(desc(cnt)
 
 # activation_date ---------------------------------------------------------
 
+head(avi$activation_date)
+avi <- avi %>% mutate(mday = mday(activation_date), 
+                      wday = wday(activation_date))
+avi %>% select(contains("day")) %>% head()
+
+
+
+# user_type ---------------------------------------------------------------
+
+table(avi$user_type)
+
+avi <- avi %>% mutate(user_Company = ifelse(user_type == "Company", 1, 0), 
+                      user_Private = ifelse(user_type == "Private", 1, 0), 
+                      user_Shop = ifelse(user_type == "Shop", 1, 0), 
+                      user_type = factor(user_type) %>% as.integer())
+
+avi %>% select(contains("user")) %>% head
+
+
+
+# image, image_top1 -------------------------------------------------------
+
+# img section
+
+
+
+# join -------------------------------------------------------------
+
+avi <- avi %>% mutate(txt = paste(title, description, sep = " "))
+
+
+
+
+# NA recheck --------------------------------------------------------------
+
+sapply(avi, function (x) sum(is.na(x)))
+
+
+
+# drop variables ----------------------------------------------------------
+
+avi <- avi %>% select(-item_id, -image, -title, -description, -activation_date)
+
+head(avi)
+range(avi$user_id)
+glimpse(avi)
+skim(avi)
+
 
 
 # [1] "item_id"              "user_id"              "region"              
@@ -242,10 +293,6 @@ avi %>% group_by(item_seq_number) %>% summarise(cnt = n()) %>% arrange(desc(cnt)
 # [10] "title"                "description"          "price"               
 # [13] "item_seq_number"      "activation_date"      "user_type"           
 # [16] "image"                "image_top_1"          "deal_probability"    
-
-
-
-
 
 
 # library(magrittr)
@@ -258,12 +305,6 @@ avi %>% group_by(item_seq_number) %>% summarise(cnt = n()) %>% arrange(desc(cnt)
 # library(stringi)
 # library(forcats)
 
-#   mutate(no_img = is.na(image) %>% as.integer(),
-#          user_type = factor(user_type),
-#          txt = paste(title, description, sep = " "),
-#          mday = mday(activation_date),
-#          wday = wday(activation_date)) %>% 
-#   select(-item_id, -image, -title, -description, -activation_date) %>% 
 #   replace_na(list(image_top_1 = -1, price = -1, 
 #                   param_1 = 0, param_2 = 0, param_3 = 0, 
 #                   desc_len = 0, desc_cap = 0, desc_pun = 0, 
