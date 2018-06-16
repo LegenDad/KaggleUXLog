@@ -8,7 +8,6 @@ glimpse(btr)
 glimpse(bte)
 tri <- 1:nrow(btr)
 y <- log1p(btr$count)
-y %>% c()
 
 colnames(btr)
 colnames(bte)
@@ -23,7 +22,9 @@ bike <- btr %>% select(-casual, -registered, -count) %>%
          wday = wday(datetime), 
          qday = qday(datetime), 
          week = week(datetime), 
-         hour = hour(datetime)) %>% select(-datetime)
+         hour = hour(datetime), 
+         am = am(datetime) %>% as.integer(), 
+         pm = pm(datetime) %>% as.integer()) %>% select(-datetime)
 
 tr <- bike[tri, ]
 tr_index <- sample(nrow(tr)*0.7)  
@@ -57,7 +58,6 @@ m_xgb <- xgb.train(p, dtrain, p$nrounds, list(val = dval),
 
 
 xgb.importance(feature_names = colnames(dtrain), m_xgb) %>% xgb.plot.importance()
-
 
 realtest <- xgb.DMatrix(data = data.matrix(bike[-tri,]))
 preT <- expm1(predict(m_xgb, realtest))
