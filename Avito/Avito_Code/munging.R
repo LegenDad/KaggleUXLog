@@ -7,14 +7,14 @@ library(skimr)
 library(DT)
 library(lubridate)
 avi <- read_csv("../input/train.csv")
-# avtte <- read_csv("../input/test.csv")
+# avite <- read_csv("../input/test.csv")
 
 
 # NA Check ---------------------------------------------------------------------
 
 
-# avtte_na <- sapply(avtte, function(x) sum(is.na(x)))
-# avtte_na[avtte_na > 0]
+# avite_na <- sapply(avite, function(x) sum(is.na(x)))
+# avite_na[avite_na > 0]
 avi_na <- sapply(avi, function (x) sum(is.na(x)))
 avi_na[avi_na>0]
 # p1_na, p2_na, p3_na, dsc_na, price_na, img_na, img_t1_na
@@ -160,7 +160,7 @@ avi %>% add_count(user_id) %>% group_by(n) %>% summarise(count= n())
 sqrt(237)
 150324 * 0.00002
 
-avi %>% add_count(user_id) %>% summarise(count = n_distinct(n))
+avi %>% add_count(user_id) %>% summarize(count = n_distinct(n))
 
 avi <- avi %>% mutate(user_id = factor(user_id) %>% 
                         fct_lump(prop = 0.00002) %>% as.integer())
@@ -233,11 +233,12 @@ avi %>% select(contains("title")) %>% skim()
 # item_seq_number ---------------------------------------------------------
 
 glimpse(avi$item_seq_number)
-avi %>% group_by(item_seq_number) %>% summarise(cnt = n()) %>% arrange(desc(cnt))
+avi %>% group_by(item_seq_number) %>% summarize(cnt = n()) %>% arrange(desc(cnt))
 
 # activation_date ---------------------------------------------------------
 
 head(avi$activation_date)
+range(avi$activation_date)
 avi <- avi %>% mutate(mday = mday(activation_date), 
                       wday = wday(activation_date))
 avi %>% select(contains("day")) %>% head()
@@ -281,40 +282,70 @@ sapply(avi, function (x) sum(is.na(x)))
 avi <- avi %>% select(-item_id, -image, -title, -description, -activation_date)
 
 head(avi)
-range(avi$user_id)
+
 glimpse(avi)
-skim(avi)
 
 
-
-# [1] "item_id"              "user_id"              "region"              
-# [4] "city"                 "parent_category_name" "category_name"       
-# [7] "param_1"              "param_2"              "param_3"             
-# [10] "title"                "description"          "price"               
-# [13] "item_seq_number"      "activation_date"      "user_type"           
-# [16] "image"                "image_top_1"          "deal_probability"    
+# txt ---------------------------------------------------------------------
+library(magrittr)
 
 
-# library(magrittr)
+avi$txt %>% str_to_lower() %>% head()
+avi %$% head(txt)
+
+avi %>% head %$% str_to_lower(txt)
+avi %>% head %$% str_to_lower(txt, "ru")
+avi %>% tail %$% str_to_lower(txt)
+
+avi %$% head(txt) %>% str_replace_all("[[:alpha:]]", " ")
+avi %$% head(txt) %>% str_replace_all("[^[:alpha:]]", " ")
+
+avi %$% head(txt) %>% str_replace_all("[^[:alpha:]]", " ") %>% 
+  str_replace_all("\\s+", " ")
+
+library(tokenizers)
+
+avi %$% head(txt) %>% str_replace_all("[^[:alpha:]]", " ") %>% 
+  str_replace_all("\\s+", " ") %>% tokenize_word_stems(language = "russian")
+
+
+library(text2vec)
+
+avi %$% head(txt) %>% str_replace_all("[^[:alpha:]]", " ") %>% 
+  str_replace_all("\\s+", " ") %>% tokenize_word_stems(language = "russian") %>% 
+  itoken()
+it <- avi %$% head(txt) %>% str_replace_all("[^[:alpha:]]", " ") %>% 
+  str_replace_all("\\s+", " ") %>% tokenize_word_stems(language = "russian") %>% 
+  itoken()
+
+it
+str(it)
+
+?itoken
+library(stopwords)
+
+foo <- create_vocabulary(it, ngram = c(1, 1), stopwords = stopwords("ru"))
+foo2 <- create_vocabulary(it, stopwords = stopwords("ru"))
+foo == foo2
+identical(foo, foo2)
+identical(5, 5.0)
+foo3 <- create_vocabulary(it, ngram = c(1, 2), stopwords = stopwords("ru"))
+identical(foo, foo3)
+
+# it <- tr_te %$%
+#   str_to_lower(txt) %>%
+#   str_replace_all("[^[:alpha:]]", " ") %>%
+#   str_replace_all("\\s+", " ") %>%
+#   tokenize_word_stems(language = "russian") %>% 
+#   itoken()
+
 # library(text2vec)
-# library(tokenizers)
 # library(stopwords)
 # library(xgboost)
 # library(Matrix)
-# library(stringr)
 # library(stringi)
 # library(forcats)
 
-#   replace_na(list(image_top_1 = -1, price = -1, 
-#                   param_1 = 0, param_2 = 0, param_3 = 0, 
-#                   desc_len = 0, desc_cap = 0, desc_pun = 0, 
-#                   desc_dig = 0, desc_capE = 0, desc_capR = 0)) %T>% 
-#   glimpse()
-# 
-# rm(tr, te); gc()
-# 
-# #---------------------------
-# cat("Parsing text...\n")
 # it <- tr_te %$%
 #   str_to_lower(txt) %>%
 #   str_replace_all("[^[:alpha:]]", " ") %>%
