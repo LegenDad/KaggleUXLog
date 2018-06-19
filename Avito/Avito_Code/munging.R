@@ -288,6 +288,9 @@ glimpse(avi)
 
 # txt ---------------------------------------------------------------------
 library(magrittr)
+library(tokenizers)
+library(text2vec)
+library(stopwords)
 
 
 avi$txt %>% str_to_lower() %>% head()
@@ -303,13 +306,10 @@ avi %$% head(txt) %>% str_replace_all("[^[:alpha:]]", " ")
 avi %$% head(txt) %>% str_replace_all("[^[:alpha:]]", " ") %>% 
   str_replace_all("\\s+", " ")
 
-library(tokenizers)
 
 avi %$% head(txt) %>% str_replace_all("[^[:alpha:]]", " ") %>% 
   str_replace_all("\\s+", " ") %>% tokenize_word_stems(language = "russian")
 
-
-library(text2vec)
 
 avi %$% head(txt) %>% str_replace_all("[^[:alpha:]]", " ") %>% 
   str_replace_all("\\s+", " ") %>% tokenize_word_stems(language = "russian") %>% 
@@ -322,7 +322,7 @@ it
 str(it)
 
 ?itoken
-library(stopwords)
+?prune_vocabulary
 
 foo <- create_vocabulary(it, ngram = c(1, 1), stopwords = stopwords("ru"))
 foo2 <- create_vocabulary(it, stopwords = stopwords("ru"))
@@ -330,39 +330,67 @@ foo == foo2
 identical(foo, foo2)
 identical(5, 5.0)
 foo3 <- create_vocabulary(it, ngram = c(1, 2), stopwords = stopwords("ru"))
+foo4 <- create_vocabulary(it, ngram = c(1, 3), stopwords = stopwords("ru"))
 identical(foo, foo3)
-
+View(foo4)
+args(prune_vocabulary)
+foobar <- prune_vocabulary(foo, term_count_min = 2)
+foobar2 <- prune_vocabulary(foo, term_count_min = 2, doc_proportion_max = .2)
+foobar3 <- prune_vocabulary(foo, term_count_min = 2, doc_proportion_min = .2)
+foobar4 <- prune_vocabulary(foo, term_count_min = 2, vocab_term_max = 5)
+?vocab_vectorizer
+foobar5 <- vocab_vectorizer(foobar4)
 # it <- tr_te %$%
 #   str_to_lower(txt) %>%
 #   str_replace_all("[^[:alpha:]]", " ") %>%
 #   str_replace_all("\\s+", " ") %>%
 #   tokenize_word_stems(language = "russian") %>% 
 #   itoken()
+# vect <- create_vocabulary(it, ngram = c(1, 1), stopwords = stopwords("ru")) %>%
+#   prune_vocabulary(term_count_min = 3, doc_proportion_max = 0.4, vocab_term_max = 12500) %>% 
+#   vocab_vectorizer()
 
-# library(text2vec)
-# library(stopwords)
+
+
 # library(xgboost)
 # library(Matrix)
 # library(stringi)
 # library(forcats)
+avi100 <- avi %>% head(100)
 
-# it <- tr_te %$%
+# it <- avi100 %$%
 #   str_to_lower(txt) %>%
 #   str_replace_all("[^[:alpha:]]", " ") %>%
 #   str_replace_all("\\s+", " ") %>%
-#   tokenize_word_stems(language = "russian") %>% 
+#   tokenize_word_stems(language = "russian") %>%
 #   itoken()
-# 
+
 # vect <- create_vocabulary(it, ngram = c(1, 1), stopwords = stopwords("ru")) %>%
-#   prune_vocabulary(term_count_min = 3, doc_proportion_max = 0.4, vocab_term_max = 12500) %>% 
+#   prune_vocabulary(term_count_min = 3, doc_proportion_max = 0.4, vocab_term_max = 12500) %>%
 #   vocab_vectorizer()
-# 
+
 # m_tfidf <- TfIdf$new(norm = "l2", sublinear_tf = T)
-# tfidf <-  create_dtm(it, vect) %>% 
+# tfidf <-  create_dtm(it, vect) %>%
 #   fit_transform(m_tfidf)
 # 
 # rm(it, vect, m_tfidf); gc()
 # 
+dim(avi100)
+library(Matrix)
+dim(X)
+glimpse(avi100)
+library(skimr)
+skim(avi100)
+avi100 <- avi %>% select(-description, -image, -param_1, -param_2, -param_3)
+dim(X)
+X <- avi100 %>%
+  select(-txt) %>%
+  sparse.model.matrix(~ . - 1, .) %>%
+  cbind(tfidf)
+
+dim(tfidf)
+dim(sparse.model.matrix(~ . - 1, avi100))
+dim(head(avi,100))
 # #---------------------------
 # cat("Preparing data...\n")
 # X <- tr_te %>% 
