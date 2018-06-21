@@ -47,9 +47,9 @@ params <- list(objective = "regression",
                min_data_in_leaf = 1, 
                learning_rate = 0.05,
                num_leaves = 30, 
-               min_sum_hessian_in_leaf = 100, 
+               min_sum_hessian_in_leaf = 11, 
                feature_fraction = .7, 
-               bagging_fraction = .7, 
+               bagging_fraction = .8, 
                bagging_freq = 5)
 
 lgb_vm <- lgb.train(params, dtrain, 
