@@ -32,12 +32,14 @@ featureEngineer = function(df) {
 train = featureEngineer(train)
 test = featureEngineer(test)
 
+train <- createDummyFeatures(train)
+test <- createDummyFeatures(test)
 # Convert the target feature using a log(x+1) transformation and optimize w.r.t. rmse later (equivalent to optimizing rmsle).
 train$count = log1p(train$count)
 
 # Create task and learner
 trainTask = makeRegrTask(data = train, target = "count")
-lrn = makeLearner("regr.xgboost", nrounds = 400, nthread = 1, base_score = mean(train$count))
+lrn = makeLearner("regr.xgboost", nrounds = 400, nthread = 4, base_score = mean(train$count))
 
 # Define hyperparameter ranges you want to consider for tuning
 ps = makeParamSet(
@@ -51,14 +53,17 @@ ps = makeParamSet(
 # Use 'maxit' iterations of random search for tuning (parallelize each iteration using 16 cores)
 ctrl = makeTuneControlRandom(maxit = 48)
 rdesc = makeResampleDesc("CV", iters = 4)
-parallelStartMulticore(8)
+parallelStartMulticore(40)
 (res = tuneParams(lrn, trainTask, rdesc, measures = rmse, par.set = ps, control = ctrl))
 parallelStop()
 
 # Train the model with best hyperparameters
-mod = train(setHyperPars(lrn, par.vals = c(res$x, nthread = 16, verbose = 1)), trainTask)
+mod = train(setHyperPars(lrn, par.vals = c(res$x, nthread = 8, verbose = 1)), trainTask)
 
 # Make prediction (convert predictions back using the inverse of log(x+1))
 pred = expm1(getPredictionResponse(predict(mod, newdata = test)))
 submit = data.frame(datetime = dateTest, count = pred)
-write.csv(submit, file = "script.csv", row.names = FALSE)
+write.csv(submit, file = "mlr.csv", row.names = FALSE)
+
+
+Result: eta=0.0738; subsample=0.861; colsample_bytree=0.736; max_depth=9; min_child_weight=12
