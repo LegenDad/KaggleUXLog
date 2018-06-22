@@ -65,5 +65,3 @@ pred = expm1(getPredictionResponse(predict(mod, newdata = test)))
 submit = data.frame(datetime = dateTest, count = pred)
 write.csv(submit, file = "mlr.csv", row.names = FALSE)
 
-
-Result: eta=0.0738; subsample=0.861; colsample_bytree=0.736; max_depth=9; min_child_weight=12
