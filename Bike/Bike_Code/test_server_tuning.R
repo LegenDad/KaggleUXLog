@@ -68,7 +68,7 @@ train$count = log1p(train$count)
 
 # Create task and learner
 trainTask = makeRegrTask(data = train, target = "count")
-lrn = makeLearner("regr.xgboost", nrounds = 4000, nthread = 8,
+lrn = makeLearner("regr.xgboost", nrounds = 400, nthread = 1,
                   base_score = mean(train$count))
 
 # Define hyperparameter ranges you want to consider for tuning

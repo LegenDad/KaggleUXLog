@@ -1,7 +1,7 @@
 library(data.table)
 files <- list.files("../SubM")
-sub1 <- fread(paste0("../SubM/",files[1]))
-sub2 <- fread(paste0("../SubM/",files[2]))
+sub1 <- fread(paste0("../SubM/",files[2]))
+sub2 <- fread(paste0("../SubM/",files[4]))
 # sub3 <- fread(paste0("../SubM/",files[3]))
 # sub4 <- fread(paste0("../SubM/",files[4]))
 # sub5 <- fread(paste0("../SubM/",files[5]))
@@ -16,6 +16,8 @@ fwrite(newsub, "../SubM/bagging2.csv")
 
 
 
+# xgboost + lgbm = bagging
+# bagging + script = bagging2
 
 
 

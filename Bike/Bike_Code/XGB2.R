@@ -54,6 +54,7 @@ bike$h_dvi       <- factor(bike$h_dvi)
 #                         windspeed = factor(windspeed) %>%  fct_lump(n=5))
 
 # bike <- model.matrix(~. -1, bike)
+library(Matrix)
 bike <- sparse.model.matrix(~. -1, bike)
 
 tr <- bike[tri,]
@@ -72,14 +73,15 @@ p <- list(booster = "gbtree",
           eval_metric = "rmse",
           nthread = 8,
           eta = 0.05,
-          max_depth = 18,
+          max_depth = 8,
           min_child_weight = 11,
-          gamma = 0,
-          subsample = 0.8,
-          colsample_bytree = 0.7,
-          alpha = 2.25,
-          lambda = 0,
+          # gamma = 0,
+          subsample = .8,
+          colsample_bytree = .7,
+          # alpha = 2.25,
+          # lambda = 0,
           nrounds = 5000)
+
 
 
 f_xgb <- xgb.train(p, train, p$nrounds, list(val = val), 
