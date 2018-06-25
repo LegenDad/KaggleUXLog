@@ -249,10 +249,7 @@ avi %>% select(contains("day")) %>% head()
 
 table(avi$user_type)
 
-avi <- avi %>% mutate(user_Company = ifelse(user_type == "Company", 1, 0), 
-                      user_Private = ifelse(user_type == "Private", 1, 0), 
-                      user_Shop = ifelse(user_type == "Shop", 1, 0), 
-                      user_type = factor(user_type) %>% as.integer())
+avi <- avi %>% mutate(user_type = factor(user_type))
 
 avi %>% select(contains("user")) %>% head
 
@@ -320,6 +317,14 @@ it <- avi %$% head(txt) %>% str_replace_all("[^[:alpha:]]", " ") %>%
 
 it
 str(it)
+vect <- create_vocabulary(it, ngram = c(1, 1), stopwords = stopwords("ru")) %>%
+  prune_vocabulary(term_count_min = 1, doc_proportion_max = 0.4, vocab_term_max = 12500) %>%
+  vocab_vectorizer()
+m_tfidf <- TfIdf$new(norm = "l2", sublinear_tf = T)
+tfidf <-  create_dtm(it, vect) %>%
+  fit_transform(m_tfidf)
+
+
 
 ?itoken
 ?prune_vocabulary
@@ -381,8 +386,8 @@ dim(X)
 glimpse(avi100)
 library(skimr)
 skim(avi100)
-avi100 <- avi %>% select(-description, -image, -param_1, -param_2, -param_3)
-dim(X)
+
+
 X <- avi100 %>%
   select(-txt) %>%
   sparse.model.matrix(~ . - 1, .) %>%
