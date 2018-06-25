@@ -311,6 +311,10 @@ avi %$% head(txt) %>% str_replace_all("[^[:alpha:]]", " ") %>%
 avi %$% head(txt) %>% str_replace_all("[^[:alpha:]]", " ") %>% 
   str_replace_all("\\s+", " ") %>% tokenize_word_stems(language = "russian") %>% 
   itoken()
+
+avi %$% head(txt) %>% str_replace_all("[^[:alpha:]]", " ") %>% 
+  str_replace_all("\\s+", " ") %>% word_tokenizer(language = "russian")
+
 it <- avi %$% head(txt) %>% str_replace_all("[^[:alpha:]]", " ") %>% 
   str_replace_all("\\s+", " ") %>% tokenize_word_stems(language = "russian") %>% 
   itoken()
