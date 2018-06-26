@@ -9,9 +9,7 @@ library(lubridate)
 avi <- read_csv("../input/train.csv")
 # avite <- read_csv("../input/test.csv")
 
-
 # NA Check ---------------------------------------------------------------------
-
 
 # avite_na <- sapply(avite, function(x) sum(is.na(x)))
 # avite_na[avite_na > 0]
@@ -294,7 +292,6 @@ avi$txt %>% str_to_lower() %>% head()
 avi %$% head(txt)
 
 avi %>% head %$% str_to_lower(txt)
-avi %>% head %$% str_to_lower(txt, "ru")
 avi %>% tail %$% str_to_lower(txt)
 
 avi %$% head(txt) %>% str_replace_all("[[:alpha:]]", " ")
@@ -328,7 +325,7 @@ m_tfidf <- TfIdf$new(norm = "l2", sublinear_tf = T)
 tfidf <-  create_dtm(it, vect) %>%
   fit_transform(m_tfidf)
 
-
+avi %>% head() %>% select(-txt) %>% sparse.model.matrix(~.-1, .) %>% cbind(tfidf)
 
 ?itoken
 ?prune_vocabulary
@@ -349,6 +346,8 @@ foobar3 <- prune_vocabulary(foo, term_count_min = 2, doc_proportion_min = .2)
 foobar4 <- prune_vocabulary(foo, term_count_min = 2, vocab_term_max = 5)
 ?vocab_vectorizer
 foobar5 <- vocab_vectorizer(foobar4)
+
+
 # it <- tr_te %$%
 #   str_to_lower(txt) %>%
 #   str_replace_all("[^[:alpha:]]", " ") %>%
@@ -367,24 +366,27 @@ foobar5 <- vocab_vectorizer(foobar4)
 # library(forcats)
 avi100 <- avi %>% head(100)
 
-# it <- avi100 %$%
-#   str_to_lower(txt) %>%
-#   str_replace_all("[^[:alpha:]]", " ") %>%
-#   str_replace_all("\\s+", " ") %>%
-#   tokenize_word_stems(language = "russian") %>%
-#   itoken()
+it <- avi100 %$%
+  str_to_lower(txt) %>%
+  str_replace_all("[^[:alpha:]]", " ") %>%
+  str_replace_all("\\s+", " ") %>%
+  tokenize_word_stems(language = "russian") %>%
+  itoken()
 
-# vect <- create_vocabulary(it, ngram = c(1, 1), stopwords = stopwords("ru")) %>%
-#   prune_vocabulary(term_count_min = 3, doc_proportion_max = 0.4, vocab_term_max = 12500) %>%
-#   vocab_vectorizer()
+vect <- create_vocabulary(it, ngram = c(1, 1), stopwords = stopwords("ru")) %>%
+  prune_vocabulary(term_count_min = 3, doc_proportion_max = 0.4, vocab_term_max = 12500) %>%
+  vocab_vectorizer()
 
-# m_tfidf <- TfIdf$new(norm = "l2", sublinear_tf = T)
-# tfidf <-  create_dtm(it, vect) %>%
-#   fit_transform(m_tfidf)
+m_tfidf <- TfIdf$new(norm = "l2", sublinear_tf = T)
+tfidf <-  create_dtm(it, vect) %>%
+  fit_transform(m_tfidf)
 # 
 # rm(it, vect, m_tfidf); gc()
 # 
 dim(avi100)
+dim(tfidf)
+avi100 %>% select(-txt) %>% sparse.model.matrix(~.-1, .) %>% cbind(tfidf)
+
 library(Matrix)
 dim(X)
 glimpse(avi100)
