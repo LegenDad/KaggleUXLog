@@ -77,35 +77,42 @@ X <- avi %>% select(-txt) %>% sparse.model.matrix(~.-1, .) %>% cbind(tfidf)
 mem_used()
 rm(avi, tfidf); gc()
 
-dtest <- xgb.DMatrix(data = X[-tri, ])
-X <- X[tri, ]; gc()
-tri <- caret::createDataPartition(y, p = 0.9, list = F) %>% c()
-dtrain <- xgb.DMatrix(data = X[tri, ], label = y[tri])
-dval <- xgb.DMatrix(data = X[-tri, ], label = y[-tri])
-cols <- colnames(X)
 
-rm(X, y, tri); gc()
+library(xgboost)
+# tri <- caret::createDataPartition(y, p = 0.7, list = F)
+# is(tri)
+tri <- caret::createDataPartition(y, p = 0.7, list = F) %>% c()
+is(tri)
+dtest <- xgb.DMatrix(data = X[-tri,])
+X <- X[tri,]
+idx <- caret::createDataPartition(y[tri], p=0.9, list = F) %>% c()
+dtrain <- xgb.DMatrix(data = X[idx,], label = y[tri][idx])
+dval <- xgb.DMatrix(data = X[-idx,], label = y[tri][-idx])
 
-#---------------------------
-cat("Training model...\n")
-p <- list(objective = "reg:logistic",
-          booster = "gbtree",
-          eval_metric = "rmse",
-          nthread = 8,
-          eta = 0.05,
-          max_depth = 18,
-          min_child_weight = 11,
-          gamma = 0,
-          subsample = 0.8,
-          colsample_bytree = 0.7,
-          alpha = 2.25,
-          lambda = 0,
-          nrounds = 5000)
+# object_size(X)
+# object_size(y)
+# rm(X, y, tri); gc()
 
-m_xgb <- xgb.train(p, dtrain, p$nrounds, list(val = dval), print_every_n = 10, early_stopping_rounds = 50)
+p <- list(objective = "reg:logistic", 
+          booster = "gbtree", 
+          eval_metric = "rmse", 
+          nthread = 8, 
+          eta = 0.05, 
+          max_depth = 18, 
+          min_child_weight = 11, 
+          gamma = 0, 
+          subsample = 0.8, 
+          colsample_bytree = 0.7, 
+          alpha = 2.25, 
+          lambda = 0, 
+          nrounds = 50)
 
-xgb.importance(cols, model = m_xgb) %>%   
-  xgb.plot.importance(top_n = 35)
+m_xgb <- xgb.train(p, dtrain, p$nrounds, list(val=dval), 
+                   print_every_n = 10, early_stopping_rounds = 50)
+
+xgb.importance(colnames(dtrain), m_xgb) %>% xgb.plot.importance(top_n = 20)
+
+
 
 #---------------------------
 cat("Creating submission file...\n")
