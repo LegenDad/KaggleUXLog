@@ -112,10 +112,15 @@ m_xgb <- xgb.train(p, dtrain, p$nrounds, list(val=dval),
 
 xgb.importance(colnames(dtrain), m_xgb) %>% xgb.plot.importance(top_n = 20)
 
+pred <- predict(m_xgb, dtest)
+range(pred)
+?rmse
+library(ModelMetrics)
+rmse(y[-tri], pred)
+
 
 
 #---------------------------
-cat("Creating submission file...\n")
 read_csv("../input/sample_submission.csv")  %>%  
   mutate(deal_probability = predict(m_xgb, dtest)) %>%
   write_csv(paste0("xgb_tfidf", m_xgb$best_score, ".csv"))
