@@ -7,6 +7,8 @@
 
 [EDA](Avito/Avito_Code/EDA.html)
 
+[Note](Avito/Note/Note.md)
+
 ---
 ### TalkingData AdTracking Fraud Detection Challenge
 
