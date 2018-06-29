@@ -31,11 +31,13 @@ region, city, category, param 등 일반적으로 명목형 변수로 분류 할
 ```R
 avi <- avi %>%
   mutate(param_1 = factor(param_1) %>% as.integer(),
-         param_2 = factor(param_2) %>% as.integer()
+         param_2 = factor(param_2) %>% as.integer())
 ```
 이런 방식으로 factor 특성으로 변경하고, integer 형식으로 변경을 하게 되면, 모델 생성에 숫자형 특성을 유지할 수 있는데...
 
 ![](../output/avito_param.png)
+
+위 이미지를 보면 param_3의 경우, 한 factor가 50%를 넘는 점유율을 보이고 있고, 이대로 활용할기에는 모델링에 문제를 야기할 수 있는 느낌을 준다.
 
 
 ### Numerical
