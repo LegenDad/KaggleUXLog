@@ -65,9 +65,9 @@ params <- list(objective = "regression",
                min_data_in_leaf = 1, 
                learning_rate = 0.05,
                num_leaves = 30, 
-               min_sum_hessian_in_leaf = 11, 
-               feature_fraction = .7, 
-               bagging_fraction = .8, 
+               min_sum_hessian_in_leaf = 11,    #xgboost min_child_weight
+               feature_fraction = .7,         #xgboost colsample_bytree
+               bagging_fraction = .8,      #xgboost subsample
                bagging_freq = 5)
 
 cas_train <- xgb.DMatrix(data = tr[index,], label = cas[index])
