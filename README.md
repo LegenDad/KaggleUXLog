@@ -3,6 +3,10 @@ Kaggle UX Log
 
 
 ### Bike Sharing Demand
+
+![](Bike/output/bike_score.png)
+![](Bike/output/bike_rank.png)
+
 ---
 
 ### Avito Demand Prediction Challenge
