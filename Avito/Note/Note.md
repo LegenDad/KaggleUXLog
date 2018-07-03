@@ -114,27 +114,17 @@ avi <- avi %>%
 8. dtm을 TfIdf모델로 변환
 
 위와 같은 과정이 끝나면, dtm에 tfidf값이 들어가 있는 매트릭스가 만들어 진다.
-데이터로 바로 학습하는 것이 어려워서, 테스트로 일정 문장을 만들고 학습을 해 봤다. [학습연습코드](../Avito_Code/test_tfidf.R)
-
-
-
-``` R
-it <- avi %$%
-  str_to_lower(txt) %>%
-  str_replace_all("[^[:alpha:]]", " ") %>%
-  str_replace_all("\\s+", " ") %>%
-  tokenize_word_stems(language = "russian") %>%
-  itoken()
-
-vect <- create_vocabulary(it, stopwords = stopwords("ru")) %>%  
-  prune_vocabulary(term_count_min = 3, doc_proportion_max = 0.4,
-                   vocab_term_max = 12500) %>%
-  vocab_vectorizer()
-
-m_tfidf <- TfIdf$new(norm = "l2", sublinear_tf = T)
-tfidf <- create_dtm(it, vect) %>% fit_transform(m_tfidf)
-```
-
+데이터로 바로 학습하는 것이 어려워서, 테스트로 일정 문장을 만들고 학습을 해 봤다. [학습연습코드](https://github.com/LegenDad/KaggleUXLog/blob/master/Avito/Avito_Code/test_tfidf.R)
 
 
 ### Image
+
+Avito 데이터셋에는 `image_top_1`이라는 변수가 있어서, 이 변수를 활용하면 된다. 하지만, 이렇게 준비가 되어 있는 않는 이미지 데이터에서는 어떻게 활용을 해야 할 지가 의문이 생겨서, 어떤 방법으로 이를 활용하는 지 살펴봤지만, 아직은 이를 학습할 수준까지는 아니어서 살펴보는 수준으로만 만족해야 할 듯 하다.
+
+`VGG16` 모델 활용
+위와 같은 모델을 활용하여 이미지별로 특성을 추출하여 평균값 같은 집계값으로 변수를 만드는 과정인 듯 하다.
+
+## Model Matrix
+
+위의 featrue engineering이 끝나면 데이터를 모델 매트릭스로 만들어준다.
+단순히 데이터프레임 형태를 훈련시키는 것보다는 모델 매트릭스가 훈련의 성과가 잘 나온다. 0과 1로 구성된 모델 매트릭스를 생성하는 법은 여러 패키지에 관련 함수가 다 만들어져 있어서 변환은 어렵지 않다. 추가로 0값 마저 제외해버리는 행렬도 있다.
