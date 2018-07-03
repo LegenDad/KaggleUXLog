@@ -31,7 +31,7 @@ Bike Sharing Demand의 Score 상승의 과정에 대한 기록
 | Point  | RMSLE  |
 |---|---|
 | Basic  | 1.40  |
-| Hour  | 0.69  |
+| Hour  | 0.66  |
 
 datetime 변수에서 일, 시간 등의 성격을 변수화 시켜줘서 모델링하고 예측하였더니 점수 향상이 있었다.
 ``` r
@@ -56,7 +56,7 @@ bike <- btr %>% select(-casual, -registered, -count) %>%
 | Point  | RMSLE  |
 |---|---|
 | Basic  | 1.40  |
-| Hour  | 0.69  |
+| Hour  | 0.66  |
 | XGB  | 0.60  |
 
 기존 RadomForest 모델을 XGBoosting으로 바꾼 결과 점수 향상이 있었다.
