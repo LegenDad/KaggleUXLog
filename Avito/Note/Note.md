@@ -11,6 +11,9 @@ Avito Demand Prediction Challenge
 	* [Numerical](#numerical)
 	* [Text](#text)
 	* [Image](#image)
+* [Model Matrix](#model-matrix)
+* [XGB & LGBM](#xgb-lgbm)
+* [What I Learned](#what-i-learned)
 
 <!-- /code_chunk_output -->
 
@@ -128,3 +131,22 @@ Avito 데이터셋에는 `image_top_1`이라는 변수가 있어서, 이 변수�
 
 위의 featrue engineering이 끝나면 데이터를 모델 매트릭스로 만들어준다.
 단순히 데이터프레임 형태를 훈련시키는 것보다는 모델 매트릭스가 훈련의 성과가 잘 나온다. 0과 1로 구성된 모델 매트릭스를 생성하는 법은 여러 패키지에 관련 함수가 다 만들어져 있어서 변환은 어렵지 않다. 추가로 0값 마저 제외해버리는 행렬도 있다.
+
+<br>
+
+## XGB & LGBM
+
+ADTracking에서는 LGBM의 categorical_feature 특성 덕에 두 모델에 차이가 있었는데, AVito에서는 훈련 데이터를 모델 매트릭스화해서 두 모델 간의 유의미한 차이가 발생하지는 않았다. 학습을 해야 하는 부분이 많아서 따라가기에도 벅찼지만, Kaggle 순위는 21%, 384등으로 마감했다.
+
+<br>
+
+## What I Learned
+
+* EDA를 HTML화
+* Feature Engineering
+	* category : factor, fct_lump
+	* log, log1p  <<<>>>  exp
+* text2vect
+* DTM
+* TfIdf
+* Model Matrix or OneHotEncoding
