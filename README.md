@@ -4,11 +4,20 @@ Kaggle UX Log
 <!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=6 orderedList=false} -->
 <!-- code_chunk_output -->
 
+* [TrackML Particle Tracking Challenge](#trackml-particle-tracking-challenge)
 * [Bike Sharing Demand](#bike-sharing-demand)
 * [Avito Demand Prediction Challenge](#avito-demand-prediction-challenge)
 * [TalkingData AdTracking Fraud Detection Challenge](#talkingdata-adtracking-fraud-detection-challenge)
 
 <!-- /code_chunk_output -->
+
+### TrackML Particle Tracking Challenge
+
+High Energy Physics particle tracking in CERN detectors
+
+![](https://storage.googleapis.com/kaggle-media/competitions/CERN/cern_graphic.png)
+
+[Note](TrackML/Note/Note.md)
 
 
 ### Bike Sharing Demand
@@ -21,8 +30,8 @@ Kaggle UX Log
 
 ### Avito Demand Prediction Challenge
 
-[EDA](Avito/Avito_Code/EDA.html)
-
+![](Avito/output/avito_price.png)
+[EDA](Avito/Avito_Code/EDA.html)     
 [Note](Avito/Note/Note.md)
 
 ---
