@@ -1,6 +1,15 @@
 Kaggle UX Log
 ===
 
+<!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=6 orderedList=false} -->
+<!-- code_chunk_output -->
+
+* [Bike Sharing Demand](#bike-sharing-demand)
+* [Avito Demand Prediction Challenge](#avito-demand-prediction-challenge)
+* [TalkingData AdTracking Fraud Detection Challenge](#talkingdata-adtracking-fraud-detection-challenge)
+
+<!-- /code_chunk_output -->
+
 
 ### Bike Sharing Demand
 
