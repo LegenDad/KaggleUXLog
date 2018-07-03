@@ -84,6 +84,57 @@ avi <- avi %>%
 
 ### Text
 
+일단 text에서는 `feature engineering`을 위해 필요 파생 변수를 생성해주고 진행했다. 텍스트의 길이를 추출해서 integer 속성을 뽑아내고, 각각의 텍스트에 대문자, 특수문자, 숫자의 카운트 또한 intger 속성으로 뽑아냈다.
+```R
+avi <- avi %>%
+  mutate(dsc_len = str_length(description),
+         dsc_capE = str_count(description, "[A-Z]"),
+         dsc_capR = str_count(description, "[А-Я]"),
+         dsc_cap = str_count(description, "[A-ZА-Я]"),
+         dsc_pun = str_count(description, "[[:punct:]]"),
+         dsc_dig = str_count(description, "[[:digit:]]"),
+         title_len = str_length(title),
+         title_capE = str_count(title, "[A-Z]"),
+         title_capR = str_count(title, "[А-Я]"),
+         title_cap = str_count(title, "[A-ZА-Я]"),
+         title_pun = str_count(title, "[[:punct:]]"),
+         title_dig = str_count(title, "[[:digit:]]"),
+         txt = paste(title, description, sep = " "))
+```
+
+파생 변수 생성 후에는, text와 descrpiton을 하나의 항목으로 합치고, 이 문장에 대한 `tfidf`을 계산하여 이를 변수화 한다. 텍스트 분석에 있어서 `text2vec`, `word2vec`, `FastText` 같은 방법을 활용한다. 상위권자들의 soloution에는 `FastText`를 많이 사용한 듯 하고, 본인은 `text2vec`을 사용법을 학습했다.
+
+1. 텍스트 정제
+2. word_stems 생성 후 token 생성
+3. token을 이용 불용어 처리한 term, doc 수 추출
+4. prune_vocabulary를 통해 가지 치기
+5. term, doc 표를 벡터화
+6. 벡터를 DTM(Documnet Term Matrix)으로 변환
+7. tfidf 모델 생성
+8. dtm을 TfIdf모델로 변환
+
+위와 같은 과정이 끝나면, dtm에 tfidf값이 들어가 있는 매트릭스가 만들어 진다.
+데이터로 바로 학습하는 것이 어려워서, 테스트로 일정 문장을 만들고 학습을 해 봤다. [학습연습코드](Avito/Avito_Code/test_tfidf.R)
+
+
+
+``` R
+it <- avi %$%
+  str_to_lower(txt) %>%
+  str_replace_all("[^[:alpha:]]", " ") %>%
+  str_replace_all("\\s+", " ") %>%
+  tokenize_word_stems(language = "russian") %>%
+  itoken()
+
+vect <- create_vocabulary(it, stopwords = stopwords("ru")) %>%  
+  prune_vocabulary(term_count_min = 3, doc_proportion_max = 0.4,
+                   vocab_term_max = 12500) %>%
+  vocab_vectorizer()
+
+m_tfidf <- TfIdf$new(norm = "l2", sublinear_tf = T)
+tfidf <- create_dtm(it, vect) %>% fit_transform(m_tfidf)
+```
+
 
 
 ### Image
