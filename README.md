@@ -6,6 +6,7 @@ Kaggle UX Log
 
 ![](Bike/output/bike_score.png)
 ![](Bike/output/bike_rank.png)
+[Note](/Bike/Note/Note.md)
 
 ---
 
