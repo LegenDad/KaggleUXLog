@@ -1,0 +1,540 @@
+---
+title: "Santander Value Prediction Challenge: Exploratory Analysis"
+output:
+  html_document:
+    fig_height: 5.7
+    fig_width: 8
+    theme: cosmo
+    highlight: tango
+    number_sections: true
+    fig_caption: true
+    toc: true
+---
+
+# Introduction
+Many of us remember those [good days 2 years ago](https://www.kaggle.com/c/santander-customer-satisfaction) - 
+now we have a new Santander competition. And here is an Exploratory Data Analysis for the 
+Santander Value Prediction Challenge within the R environment 
+of the [data.table](https://cran.r-project.org/web/packages/data.table/vignettes/datatable-intro.html) and 
+[plotly](https://plot.ly/r/). We are provided with a dataset which has plenty of columns.
+All features are anonymized, thus, we cannot easily exploit domain knowledge for feature engineering.
+Our task is to build an algorithm that predicts the value of transactions for potential customers. The evaluation metric for this competition is 
+[Root Mean Squared Logarithmic Error](https://www.kaggle.com/c/santander-value-prediction-challenge#evaluation).
+
+# Preparations {.tabset .tabset-fade .tabset-pills}
+## Load libraries
+Here we load libraries for data wrangling and visualisation.
+```{r, message=FALSE, warning=FALSE, results='hide'}
+library(data.table)
+library(knitr)
+library(plotly)
+library(caret)
+library(irlba)
+library(lattice)
+library(h2o)
+library(randomForest)
+library(foreach)
+library(doParallel)
+library(corrplot)
+library(xgboost)
+```
+
+## Load data
+We use **fread** function from the **data.table** package. The anonymized "ID" column is dropped.
+```{r, message=FALSE, warning=FALSE, results='hide'}
+tr <- fread("../input/train.csv", drop = "ID", header = T, showProgress = F)
+te <- fread("../input/test.csv", drop = "ID", header = T, showProgress = F)
+subm <- fread("../input/sample_submission.csv", showProgress = F)
+
+set.seed(0)
+```
+
+```{r include=FALSE}
+options(tibble.width = Inf)
+```
+
+# Peek at the dataset {.tabset}
+## General info
+```{r inf, result='asis', echo=FALSE}
+cat("Train set size:", dim(tr))
+cat("Min value:", min(tr))
+cat("Max value:", max(tr))
+cat("\n")
+cat("Test set size:", dim(te))
+cat("Min value:", min(te))
+cat("Max value:", max(te))
+```
+
+## Missing values
+```{r, result='asis', echo=FALSE}
+cat("Number of missing values in the train set:",  sum(is.na(tr)))
+cat("Number of missing values in the test set:",  sum(is.na(te)))
+if (sum(is.na(tr)) + sum(is.na(te)) == 0)
+    cat("Good news, everyone! We do not have to impute NA.")
+```
+
+## Train
+```{r, result='asis', echo=FALSE}
+kable(head(tr))
+```
+
+## Test
+```{r, result='asis', echo=FALSE}
+kable(head(te))
+```
+
+## Sample Submission
+```{r, result='asis', echo=FALSE}
+kable(head(subm))
+```
+
+# Dataset columns
+## Target
+```{r, result='asis', echo=TRUE}
+target <- tr$target
+tr$target <- NULL
+summary(target)
+```
+The target variable has a wide range of values. Its distribution is right-skewed. This can be somehow 
+corrected with log-transformation. After this transformation we can safely use RMSE.
+```{r, result='asis', echo=FALSE}
+subplot(
+  plot_ly(x = ~target, type = "histogram", name = "target", 
+          marker = list(color = "dodgerblue")),
+  plot_ly(x = ~log1p(target), type = "histogram", name = "log(target)",
+          marker = list(color = "gold"))
+)
+```
+
+## Sparsity of the dataset
+The dataset itself looks sparse. The histogram shows that there are a lot of features with more than 90% of zeros.
+```{r zeros1, result='asis', echo=FALSE}
+n_zeros <- tr[, lapply(.SD, function(x) sum(x == 0) / length(x))] %>% unlist
+plot_ly(x = ~n_zeros, type = "histogram", 
+        marker = list(color = "dodgerblue")) %>% 
+  layout(title = "Histogram of zeros in dataset",
+         margin = list(l = 100))
+```
+
+## Zero variance features and duplacates
+The train set has many columns with zero variance, which can be safely removed: 
+```{r, result='asis', echo=TRUE}
+zero_var <- names(tr)[tr[, lapply(.SD, var)] == 0]
+tr[, (zero_var) := NULL] 
+te[, (zero_var) := NULL] 
+```
+```{r, result='asis', echo=FALSE}
+cat("Number of features with zero variance:", length(zero_var))
+```
+Also we remove duplicate columns:
+```{r, result='asis', echo=TRUE}
+(dup_var <- names(tr)[duplicated(lapply(tr, c))])
+tr[, (dup_var) := NULL]
+te[, (dup_var) := NULL]
+```
+
+## Features correlations
+```{r cor1, result='asis', echo=TRUE}
+(cor_var <- model.matrix(~.-1, tr) %>% 
+    cor(method = "spearman") %>% 
+    findCorrelation(cutoff = 0.99, names = TRUE) %>% 
+    gsub("`", "", .))
+```
+Here we use [Spearman's rho](https://en.wikipedia.org/wiki/Spearman%27s_rank_correlation_coefficient), which is 
+appropriate for continuous and discrete ordinal variables. We have 40 variables with correlation > 0.99. 
+I believe we can remove them:
+```{r cor2, result='asis', echo=TRUE}
+tr[, (cor_var) := NULL]
+te[, (cor_var) := NULL]
+```
+
+## Correlations with **target**
+```{r cor3, result='asis', echo=TRUE}
+cor_target <- model.matrix(~.-1, tr) %>% 
+  cor(target, method = "spearman") %>% 
+  as.data.table() %>% 
+  setnames("V1", "Spearmans_rho")
+```
+```{r cor4, result='asis', echo=FALSE}
+  plot_ly(cor_target) %>%
+  add_trace(x = ~Spearmans_rho, 
+            type = "histogram",
+            marker = list(color = "dodgerblue"),
+            name = "Train")
+```
+
+We can observe almost normal distribution with zero mean. The minimal correlation coefficient is equal to 
+`r min(cor_target$Spearmans_rho)`, maximal coefficient is equal to `r max(cor_target$Spearmans_rho)`. 
+Thus, there is no strong association between target variable and features.
+
+## Columns types
+We may find that the columns classes of the train and test sets differ:
+```{r, result='asis', echo=TRUE}
+all(names(tr) == names(te))
+all(sapply(tr, class) == sapply(te, class))
+```
+The train set has integer and numeric variables :
+```{r, result='asis', echo=TRUE}
+tr[, transpose(lapply(.SD, class))
+   ][, .N, by = V1] %>% 
+  setnames("V1", "Class") %>% 
+  kable()
+```
+
+
+The test set has only numeric columns:
+```{r, result='asis', echo=TRUE}
+te[, transpose(lapply(.SD, class))
+   ][, .N, by = V1] %>% 
+  setnames("V1", "Class") %>% 
+  kable()
+```
+
+# Train vs Test
+Here we compare the train and test sets. This includes peeking at the max and mean 
+values, standard deviation.
+```{r tr_te, result='asis', echo=FALSE}
+subplot(
+  cbind(tr = tr[, lapply(.SD, max)] %>% transpose(),
+        te = te[, lapply(.SD, max)] %>% transpose()) %>% 
+    setnames(c("tr.V1", "te.V1"), c("train", "test")) %>% 
+    plot_ly() %>%
+    add_trace(y = ~train, 
+              type = "bar",
+              marker = list(color = "dodgerblue"),
+              name = "Train") %>% 
+    add_trace(y = ~test, 
+              type = "bar",  
+              marker = list(color = "gold"),
+              opacity = 0.6,
+              name = "Test") %>% 
+    layout(annotations = list(text = "Max Values",
+                              xref = "paper",
+                              yref = "paper",
+                              x = 0.25,
+                              y = 1,
+                              showarrow = FALSE),
+           xaxis = list(title = ""),
+           yaxis = list(title = "")),
+  
+  cbind(tr = tr[, lapply(.SD, max)] %>% transpose(),
+        te = te[, lapply(.SD, max)] %>% transpose()) %>% 
+    setnames(c("tr.V1", "te.V1"), c("train", "test")) %>% 
+    plot_ly(showlegend = FALSE) %>%
+    add_trace(x = ~train, 
+              type = "histogram", 
+              marker = list(color = "dodgerblue"),
+              name = "Train") %>% 
+    add_trace(x = ~test, 
+              type = "histogram", 
+              marker = list(color = "gold"),
+              opacity = 0.6,
+              name = "Test") %>% 
+    layout(annotations = list(text = "Max Values Histogram",
+                              xref = "paper",
+                              yref = "paper",
+                              x = 0.75,
+                              y = 1,
+                              showarrow = FALSE),
+           xaxis = list(title = ""))
+)
+
+subplot(
+  cbind(tr = tr[, lapply(.SD, mean)] %>% transpose(),
+        te = te[, lapply(.SD, mean)] %>% transpose()) %>% 
+    setnames(c("tr.V1", "te.V1"), c("train", "test")) %>% 
+    plot_ly() %>%
+    add_trace(y = ~train, 
+              type = "bar",
+              marker = list(color = "dodgerblue"),
+              name = "Train") %>% 
+    add_trace(y = ~test, 
+              type = "bar",  
+              marker = list(color = "gold"),
+              opacity = 0.6,
+              name = "Test") %>% 
+    layout(annotations = list(text = "Mean Values",
+                              xref = "paper",
+                              yref = "paper",
+                              x = 0.25,
+                              y = 1,
+                              showarrow = FALSE),
+           xaxis = list(title = ""),
+           yaxis = list(title = "")),
+  
+  cbind(tr = tr[, lapply(.SD, mean)] %>% transpose(),
+        te = te[, lapply(.SD, mean)] %>% transpose()) %>% 
+    setnames(c("tr.V1", "te.V1"), c("train", "test")) %>% 
+    plot_ly(showlegend = FALSE) %>%
+    add_trace(x = ~train, 
+              type = "histogram", 
+              marker = list(color = "dodgerblue"),
+              name = "Train") %>% 
+    add_trace(x = ~test, 
+              type = "histogram", 
+              marker = list(color = "gold"),
+              opacity = 0.6,
+              name = "Test") %>% 
+    layout(annotations = list(text = "Mean Values Histogram",
+                              xref = "paper",
+                              yref = "paper",
+                              x = 0.75,
+                              y = 1,
+                              showarrow = FALSE),
+           xaxis = list(title = ""))
+)
+
+subplot(
+  cbind(tr = tr[, lapply(.SD, sd)] %>% transpose(),
+        te = te[, lapply(.SD, sd)] %>% transpose()) %>% 
+    setnames(c("tr.V1", "te.V1"), c("train", "test")) %>% 
+    plot_ly() %>%
+    add_trace(y = ~train, 
+              type = "bar",
+              marker = list(color = "dodgerblue"),
+              name = "Train") %>% 
+    add_trace(y = ~test, 
+              type = "bar",  
+              marker = list(color = "gold"),
+              opacity = 0.6,
+              name = "Test") %>% 
+    layout(annotations = list(text = "Standard Deviation",
+                              xref = "paper",
+                              yref = "paper",
+                              x = 0.25,
+                              y = 1,
+                              showarrow = FALSE),
+           xaxis = list(title = ""),
+           yaxis = list(title = "")),
+  
+  cbind(tr = tr[, lapply(.SD, sd)] %>% transpose(),
+        te = te[, lapply(.SD, sd)] %>% transpose()) %>% 
+    setnames(c("tr.V1", "te.V1"), c("train", "test")) %>% 
+    plot_ly(showlegend = FALSE) %>%
+    add_trace(x = ~train, 
+              type = "histogram", 
+              marker = list(color = "dodgerblue"),
+              name = "Train") %>% 
+    add_trace(x = ~test, 
+              type = "histogram", 
+              marker = list(color = "gold"),
+              opacity = 0.6,
+              name = "Test") %>% 
+    layout(annotations = list(text = "Standard Deviation Histogram",
+                              xref = "paper",
+                              yref = "paper",
+                              x = 0.75,
+                              y = 1,
+                              showarrow = FALSE),
+           xaxis = list(title = ""))
+)
+```
+We observe that statistical parameters of the data sets are different.
+One of the most asked question is if it is safe to preprocess train and test sets as a 
+combined dataset. Well, it looks like we have to.
+
+# Dim Reduction
+## PCA
+Let's get the first 25 components:
+```{r pca1, result='asis', echo=TRUE}
+n_comp <- 25
+m_pca <- prcomp_irlba(rbind(tr, te), n = n_comp, scale. = TRUE)
+```
+```{r pca2, result='asis', echo=FALSE}
+plot_ly(y = summary(m_pca)$importance[2,], 
+        type = "bar",
+        marker = list(color = "dodgerblue"),
+        name = "Variance explained")
+```
+
+The first `r n_comp` components explain `r round(summary(m_pca)$importance[3, n_comp]*100, 2)` of the variance 
+(don't forget that this is a truncated principal components analysis). 
+
+```{r pca3, result='asis', echo=FALSE}
+splom(~m_pca$x[1:nrow(tr), 1:4], pch = 16, cex = 0.3, 
+      col = alpha(rainbow(3)[as.numeric(cut(target, breaks = 3))], 0.2))
+splom(~m_pca$x[-(1:nrow(tr)), 1:4], pch = 16, cex = 0.3)
+```
+
+## Autoencoder
+To build an autoencoder we use h2o package.
+```{r aec0, include=FALSE}
+h2o.init(nthreads = 4, max_mem_size = "14G")
+```
+```{r aec1, result='asis', echo=TRUE}
+h2o.no_progress()
+
+tr_h2o <- as.h2o(tr)
+te_h2o <- as.h2o(te)
+```
+Let's train a simple model, which compresses the input space to 4 components:
+```{r aec2, result='asis', echo=TRUE}
+n_comp <- 4
+m_aec <- h2o.deeplearning(training_frame = tr_h2o,
+                          x = 1:ncol(tr_h2o),
+                          autoencoder = T,
+                          activation = "Tanh",
+                          reproducible = TRUE,
+                          seed = 0,
+                          sparse = T,
+                          hidden = c(32, n_comp, 32),
+                          max_w2 = 5,
+                          epochs = 10)
+
+tr_aec <- as.data.table(h2o.deepfeatures(m_aec, tr_h2o, layer = 2))
+te_aec <- as.data.table(h2o.deepfeatures(m_aec, te_h2o, layer = 2))
+```
+```{r aec2a, result='asis', echo=FALSE}
+splom(~tr_aec, pch = 16, cex = 0.3, 
+      col = alpha(rainbow(3)[as.numeric(cut(target, breaks = 3))], 0.2))
+splom(~te_aec, pch = 16, cex = 0.3)
+```
+
+What a messy plot for the test set! It's due to the differences between the train and test sets.
+Let's train the next model with a combined dataset:
+```{r aec3, result='asis', echo=TRUE}
+frame_h2o <- h2o.rbind(tr_h2o, te_h2o)
+m_aec <- h2o.deeplearning(training_frame = frame_h2o,
+                          x = 1:ncol(frame_h2o),
+                          autoencoder = T,
+                          activation = "Tanh",
+                          reproducible = TRUE,
+                          seed = 0,
+                          sparse = T,
+                          hidden = c(32, n_comp, 32),
+                          max_w2 = 5,
+                          epochs = 10)
+
+tr_aec <- as.data.table(h2o.deepfeatures(m_aec, tr_h2o, layer = 2))
+te_aec <- as.data.table(h2o.deepfeatures(m_aec, te_h2o, layer = 2))
+```
+```{r aec3a, result='asis', echo=FALSE}
+h2o.shutdown(prompt = FALSE)
+splom(~tr_aec, pch = 16, cex = 0.3, 
+      col = alpha(rainbow(3)[as.numeric(cut(target, breaks = 3))], 0.2))
+splom(~te_aec, pch = 16, cex = 0.3)
+```
+
+The plots look much nicer. Definitely these features can be used to train the model.
+
+# Important variables
+## Random Forest
+As a caution I'd like to include a reference to [this article](http://explained.ai/rf-importance/index.html).
+
+**TL;DR**: R (and scikit-learn) default Random Forest feature importance strategies are biased; 
+use importance = T in the Random Forest constructor then type = 1 in R **importance()** function.
+
+Here we train the **randomForest** model with 200 trees:
+
+```{r rf1, result='asis', echo=TRUE}
+registerDoParallel(cores=4)
+m_rf <- foreach(n = rep(50, 4), .combine = combine, .packages = "randomForest", .inorder = F) %dopar%{                                                                        
+  randomForest(x = tr, y = target, ntree = n, importance = T)                                                                                                           
+} 
+imp <- importance(m_rf, type = 1, scale = FALSE) %>% 
+  as.data.table(keep.rownames = "Feature") %>% 
+  setnames("%IncMSE", "IncMSE") %>% 
+  setorder(-"IncMSE")
+  
+n_top <- 25  
+```
+```{r rf2, result='asis', echo=FALSE}
+copy(imp)[, Feature := factor(Feature, 
+                        levels = unique(Feature)[order(IncMSE, decreasing = FALSE)])
+          ][1:n_top] %>% 
+  plot_ly() %>% 
+  add_trace(x = ~IncMSE , y = ~Feature,
+            orientation="h",
+            type="bar") %>% 
+  layout(title = "RF Variable Importance",
+         margin = list(l = 100))
+```
+
+`r imp$Feature[1]` is the most important variable.
+
+## Top-`r n_top` features
+Let's peek at the top-`r n_top` features correlation plot:
+```{r rf3, result='asis', echo=TRUE}
+top <- imp$Feature[1:n_top]
+m <- model.matrix(~.-1, tr[, ..top]) %>% 
+  cor(method = "spearman") 
+```  
+```{r rf4, result='asis', echo=FALSE}
+corrplot(m, type="lower", method = "number", tl.col = "black", diag=F, number.cex= 13/length(top))
+```
+
+There are features with high correlation > 0.6:
+```{r rf5, result='asis', echo=TRUE}
+diag(m) <- 0
+keep <- (colSums(abs(m) >= 0.6) > 0)
+(hc_fea <- names(keep)[keep] %>% gsub("`", "", .))
+```
+
+Their density plots show that they have a large number of zeros:
+```{r rf6, result='asis', echo=FALSE}
+p <- melt(tr[, ..hc_fea], variable.name = "Feature", measure.vars = hc_fea) %>% 
+  ggplot(aes(x = log1p(value))) + 
+  geom_density(aes(fill = Feature), alpha = 0.6) + 
+  theme_minimal() +
+  labs(x = "log1p(Feature)", y = "Density") + 
+  ggtitle("Density estimates")
+ggplotly(p)
+```
+
+Percentage of zeros:
+```{r rf7, result='asis', echo=TRUE}
+tr[, ..hc_fea
+   ][, lapply(.SD, function(x) (sum(x == 0) / length(x) * 100) %>% round(1))
+     ] %>% kable()
+```
+
+Thus, as we stated earlier, the dataset is sparse and these spurious correlations may be due to the sparsity.
+
+# XGB model with AE features
+The model we're building uses original features from the dataset as well as `r n_comp` features generated by autoencoder:
+```{r xgb1, result='asis', echo=TRUE}
+tr <- cbind(tr, tr_aec)
+te <- cbind(te, te_aec)
+```
+The dataset is converted to xgb.DMatrix format. The train set is divided into train and validation sets:
+```{r xgb2, result='asis', echo=TRUE}
+y <- log1p(target)
+dtest <- xgb.DMatrix(data = data.matrix(te))
+tri <- createDataPartition(y, p = 0.9, list = F) %>% c()
+dtrain <- xgb.DMatrix(data = data.matrix(tr[tri, ]), label = y[tri])
+dval <- xgb.DMatrix(data = data.matrix(tr[-tri, ]), label = y[-tri])
+cols <- names(tr)
+```
+The model parameters are obtained with [bayesian optimization package](https://cran.r-project.org/web/packages/rBayesianOptimization/):
+```{r xgb3, result='asis', echo=TRUE}
+p <- list(objective = "reg:linear",
+          booster = "gbtree",
+          eval_metric = "rmse",
+          nthread = 8,
+          eta = 0.007,
+          max_depth = 30,
+          min_child_weight = 52,
+          gamma = 9.690536e-02,
+          subsample = 0.95,
+          colsample_bytree = 0.1,
+          colsample_bylevel = 0.1,
+          alpha = 2.220446e-16,
+          lambda = 100,
+          nrounds = 10000)
+
+m_xgb <- xgb.train(p, dtrain, p$nrounds, list(val = dval), print_every_n = 100, early_stopping_rounds = 700)
+
+xgb.importance(cols, model = m_xgb) %>% 
+  xgb.plot.importance(top_n = 25)
+```
+
+It's interesting that the autoencoder features play important role here.
+
+```{r xgb4, result='asis', echo=TRUE}
+subm[, target := expm1(predict(m_xgb, dtest))]
+fwrite(subm, paste0("xgb_aec_", round(m_xgb$best_score, 5), ".csv"))
+```
+[Here](https://www.kaggle.com/kailex/not-so-base-xgb-ae-features-1-44/code) you can find the full version of the xgb model with AE features.
+
+
+To be continued...
