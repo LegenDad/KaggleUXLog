@@ -11,4 +11,4 @@ setnames(newsub, c("ID", 1:2))
 head(newsub)
 newsub[, target := rowMeans(newsub[,-1])]
 newsub <- newsub[, c("ID", "target")]
-fwrite(newsub, "../SubM/enbaggingSE.csv")
+fwrite(newsub, "../SubM/NenbaggingSE.csv")
